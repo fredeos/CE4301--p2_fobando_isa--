@@ -1,0 +1,6 @@
+module top (
+    input  logic A, B,
+    output logic C 
+);
+    assign C = A & B;
+endmodule
