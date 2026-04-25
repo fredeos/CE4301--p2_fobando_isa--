@@ -2,22 +2,22 @@
 
 ## ISA green sheet
 
-- <b>Tipo</b>: Reduced Instruction Set Computer (RISC)
-- <b>Clase</b>: registro-registro
-- <b>Direccionamiento</b>: little-endian
-- <b>Tipo de direccionamiento</b>: desplazamiento
-- <b>Tamaño de palabra</b>: 32 bits
-- <b>Tipos de datos</b>: enteros
-- <b>Especificaciones</b>: criptografía, seguridad
-- <b>Extensiones</b>: I (enteros), S(seguridad)
-- <b>Arquitectura</b>: F32IS
+- **Tipo**: Reduced Instruction Set Computer (RISC)
+- **Clase**: registro-registro
+- **Direccionamiento**: little-endian
+- **Tipo de direccionamiento**: desplazamiento
+- **Tamaño de palabra**: 32 bits
+- **Tipos de datos**: enteros
+- **Especificaciones**: criptografía, seguridad
+- **Extensiones**: I (enteros), S(seguridad)
+- **Arquitectura**: F32IS
 
 -----
 
 ### Banco de registros
 
-- <b>Cantidad</b>: 32 registros
-- <b>Longitud de direccion</b>: 5 bits
+- **Cantidad**: 32 registros
+- **Longitud de direccion**: 5 bits
 
 |addr|nombre|descripcion|
 |----|------|-----------|
@@ -34,8 +34,8 @@
 
 ### Banco seguro de registros
 
-- <b>Cantidad</b>: 8 registros
-- <b>Longitud de direccion</b>: 3 bits
+- **Cantidad**: 8 registros
+- **Longitud de direccion**: 3 bits
 
 |addr|nombre|descripcion|
 |----|------|-----------|
@@ -54,106 +54,105 @@
 
 | tipo | instruccion | descripcion |
 |------|-------------|-------------|
-|<b>R</b>| <code>add rd, rn, rm</code> | $R[rd] \leftarrow R[rn] + R[rm]$ |
-|<b>R</b>| <code>sub rd, rn, rm</code> | $R[rd] \leftarrow R[rn] - R[rm]$ |
-|<b>R</b>| <code>mul rd, rn, rm</code> | $R[rd] \leftarrow R[rn] * R[rm]$ |
-|<b>R</b>| <code>div rd, rn, rm</code> | $R[rd] \leftarrow R[rn]  \div R[rm]$ |
-|<b>R</b>| <code>mod rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \%\ R[rm]$ |
-|<b>R</b>| <code>and rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \&\ R[rm]$ |
-|<b>R</b>| <code>orr rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \|\ R[rm]$ |
-|<b>R</b>| <code>xor rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \^\ \ R[rm]$ |
-|<b>R</b>| <code>sll rd, rn, rm</code> | $R[rd] \leftarrow R[rn] << R[rm]$ |
-|<b>R</b>| <code>srl rd, rn, rm</code> | $R[rd] \leftarrow R[rn] >> R[rm]$ |
-|<b>R</b>| <code>mov rd, rn </code> | $R[rd] \leftarrow R[rn]$ |
-|<b>R</b>| <code>seq rd, rn, rm </code> | $R[rd] \leftarrow (R[rn] == R[rm])$ |
-|<b>I</b>| <code>addi rd, rn, rm</code> | $R[rd] \leftarrow R[rn] + imm$ |
-|<b>I</b>| <code>subi rd, rn, rm</code> | $R[rd] \leftarrow R[rn] - imm$ |
-|<b>I</b>| <code>muli rd, rn, rm</code> | $R[rd] \leftarrow R[rn] * imm$ |
-|<b>I</b>| <code>divi rd, rn, rm</code> | $R[rd] \leftarrow R[rn] \div imm$ |
-|<b>I</b>| <code>modi rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \%\ imm$ |
-|<b>I</b>| <code>andi rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \&\ imm$ |
-|<b>I</b>| <code>orri rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \|\ imm$ |
-|<b>I</b>| <code>xori rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \^\ \ imm$ |
-|<b>I</b>| <code>slli rd, rn, rm</code> | $R[rd] \leftarrow R[rn] << imm$ |
-|<b>I</b>| <code>srli rd, rn, rm</code> | $R[rd] \leftarrow R[rn] >> imm$ |
-|<b>I</b>| <code>movi rd, imm </code> | $R[rd] \leftarrow imm$ |
-|<b>I</b>| <code>seqi rd, rn, imm </code> | $R[rd] \leftarrow (R[rn] == imm)$ |
-|<b>M</b>| <code>ldw rd, $\pm$imm(rn)</code> | $R[rd] \leftarrow M[R[rn] \pm imm]_{31:0}$ |
-|<b>M</b>| <code>ldh rd, $\pm$imm(rn)</code> | $R[rd] \leftarrow M[R[rn] \pm imm]_{15:0}$ |
-|<b>M</b>| <code>ldb rd, $\pm$imm(rn)</code> | $R[rd] \leftarrow M[R[rn] \pm imm]_{7:0}$ |
-|<b>M</b>| <code>stw rd, $\pm$imm(rn)</code> | $R[rd]_{31:0} \rightarrow M[R[rn] \pm imm]$ |
-|<b>M</b>| <code>sth rd, $\pm$imm(rn)</code> | $R[rd]_{15:0} \rightarrow M[R[rn] \pm imm]$ |
-|<b>M</b>| <code>stb rd, $\pm$imm(rn)</code> | $R[rd]_{7:0} \rightarrow M[R[rn] \pm imm]$ |
-|<b>B</b>| <code>beq rn, rm, imm </code> | if ($R[rn]==R[rm]$) $PC \leftarrow PC + (imm << 2)$ |
-|<b>B</b>| <code>bne rn, rm, imm </code> | if ($R[rn]\ != R[rm]$) $PC \leftarrow PC + (imm << 2)$ |
-|<b>B</b>| <code>bgt rn, rm, imm </code> | if ($R[rn]>R[rm]$) $PC  \leftarrow PC + (imm << 2)$ |
-|<b>B</b>| <code>blt rn, rm, imm </code> | if ($R[rn]<R[rm]$) $PC \leftarrow PC + (imm << 2)$|
-|<b>B</b>| <code>bge rn, rm, imm </code> | if ($R[rn]>=R[rm]$) $PC \leftarrow PC + (imm << 2)$ |
-|<b>B</b>| <code>ble rn, rm, imm </code> | if ($R[rn]<=R[rm]$) $PC \leftarrow PC + (imm << 2)$|
-|<b>J</b>| <code>jal rd, imm </code>| $R[rd] \leftarrow PC$; $PC \leftarrow PC+imm$ |
-|<b>J</b>| <code>jalr rd, rn, imm </code>| $R[rd] \leftarrow PC$; $PC \leftarrow R[rn]+imm$ |
-|<b>S</b>| <code>login imm </code>| $R[lr] \leftarrow (imm ==\ <password>)$ |
-|<b>S</b>| <code>quit </code>| $R[lr] \leftarrow 0$ |
+|**R**| <code>add rd, rn, rm</code> | $R[rd] \leftarrow R[rn] + R[rm]$ |
+|**R**| <code>sub rd, rn, rm</code> | $R[rd] \leftarrow R[rn] - R[rm]$ |
+|**R**| <code>mul rd, rn, rm</code> | $R[rd] \leftarrow R[rn] * R[rm]$ |
+|**R**| <code>div rd, rn, rm</code> | $R[rd] \leftarrow R[rn]  \div R[rm]$ |
+|**R**| <code>mod rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \%\ R[rm]$ |
+|**R**| <code>and rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \& \ R[rm]$ |
+|**R**| <code>orr rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \|\ R[rm]$ |
+|**R**| <code>xor rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \^\ \ R[rm]$ |
+|**R**| <code>sll rd, rn, rm</code> | $R[rd] \leftarrow R[rn] << R[rm]$ |
+|**R**| <code>srl rd, rn, rm</code> | $R[rd] \leftarrow R[rn] >> R[rm]$ |
+|**R**| <code>mov rd, rn </code> | $R[rd] \leftarrow R[rn]$ |
+|**R**| <code>seq rd, rn, rm </code> | $R[rd] \leftarrow (R[rn] == R[rm])$ |
+|**I**| <code>addi rd, rn, rm</code> | $R[rd] \leftarrow R[rn] + imm$ |
+|**I**| <code>subi rd, rn, rm</code> | $R[rd] \leftarrow R[rn] - imm$ |
+|**I**| <code>muli rd, rn, rm</code> | $R[rd] \leftarrow R[rn] * imm$ |
+|**I**| <code>divi rd, rn, rm</code> | $R[rd] \leftarrow R[rn] \div imm$ |
+|**I**| <code>modi rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \%\ imm$ |
+|**I**| <code>andi rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \& \ imm$ |
+|**I**| <code>orri rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \|\ imm$ |
+|**I**| <code>xori rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \^\ \ imm$ |
+|**I**| <code>slli rd, rn, rm</code> | $R[rd] \leftarrow R[rn] << imm$ |
+|**I**| <code>srli rd, rn, rm</code> | $R[rd] \leftarrow R[rn] >> imm$ |
+|**I**| <code>movi rd, imm </code> | $R[rd] \leftarrow imm$ |
+|**I**| <code>seqi rd, rn, imm </code> | $R[rd] \leftarrow (R[rn] == imm)$ |
+|**M**| <code>ldw rd, $\pm$imm(rn)</code> | $R[rd] \leftarrow M[R[rn] \pm imm]_{31:0}$ |
+|**M**| <code>ldh rd, $\pm$imm(rn)</code> | $R[rd] \leftarrow M[R[rn] \pm imm]_{15:0}$ |
+|**M**| <code>ldb rd, $\pm$imm(rn)</code> | $R[rd] \leftarrow M[R[rn] \pm imm]_{7:0}$ |
+|**M**| <code>stw rd, $\pm$imm(rn)</code> | $R[rd]_{31:0} \rightarrow M[R[rn] \pm imm]$ |
+|**M**| <code>sth rd, $\pm$imm(rn)</code> | $R[rd]_{15:0} \rightarrow M[R[rn] \pm imm]$ |
+|**M**| <code>stb rd, $\pm$imm(rn)</code> | $R[rd]_{7:0} \rightarrow M[R[rn] \pm imm]$ |
+|**B**| <code>beq rn, rm, imm </code> | if ($R[rn]==R[rm]$) $PC \leftarrow PC + (imm << 2)$ |
+|**B**| <code>bne rn, rm, imm </code> | if ($R[rn]\ != R[rm]$) $PC \leftarrow PC + (imm << 2)$ |
+|**B**| <code>bgt rn, rm, imm </code> | if ($R[rn]>R[rm]$) $PC  \leftarrow PC + (imm << 2)$ |
+|**B**| <code>blt rn, rm, imm </code> | if ($R[rn]<R[rm]$) $PC \leftarrow PC + (imm << 2)$|
+|**B**| <code>bge rn, rm, imm </code> | if ($R[rn]>=R[rm]$) $PC \leftarrow PC + (imm << 2)$ |
+|**B**| <code>ble rn, rm, imm </code> | if ($R[rn]<=R[rm]$) $PC \leftarrow PC + (imm << 2)$|
+|**J**| <code>jal rd, imm </code>| $R[rd] \leftarrow PC$; $PC \leftarrow PC+imm$ |
+|**S**| <code>login imm </code>| $R[lr] \leftarrow (imm ==\ <password>)$ |
+|**S**| <code>quit </code>| $R[lr] \leftarrow 0$ |
 
 - Instrucciones para extension de seguridad (S)
 
 | tipo | instruccion | descripcion |
 |------|-------------|-------------|
-|<b>V</b>| <code>ldvw sd, $\pm$imm(sn)</code> | $S[sd] \leftarrow V[S[sn] \pm imm]_{31:0}$ |
-|<b>V</b>| <code>ldvh sd, $\pm$imm(sn)</code> | $S[sd] \leftarrow V[S[sn] \pm imm]_{15:0}$ |
-|<b>V</b>| <code>ldvb sd, $\pm$imm(sn)</code> | $S[sd] \leftarrow V[S[sn] \pm imm]_{7:0}$ |
-|<b>V</b>| <code>stvw sd, $\pm$imm(sn)</code> | $S[sd]_{31:0} \rightarrow V[S[sn] \pm imm]$ |
-|<b>V</b>| <code>stvh sd, $\pm$imm(sn)</code> | $S[sd]_{15:0} \rightarrow V[S[sn] \pm imm]$ |
-|<b>V</b>| <code>stvb sd, $\pm$imm(sn)</code> | $S[sd]_{7:0} \rightarrow V[S[sn] \pm imm]$ |
-|<b>PR</b>| <code>padd sd, sn, sm</code> | $S[sd] \leftarrow S[sn] + S[sm]$ |
-|<b>PR</b>| <code>psub sd, sn, sm</code> | $S[sd] \leftarrow S[sn] - S[sm]$ |
-|<b>PR</b>| <code>pmul sd, sn, sm</code> | $S[sd] \leftarrow S[sn] * S[sm]$ |
-|<b>PR</b>| <code>pdiv sd, sn, sm</code> | $S[sd] \leftarrow S[sn] \div S[sm]$ |
-|<b>PR</b>| <code>pmod sd, sn, sm</code> | $S[sd] \leftarrow S[sn]\ \%\ S[sm]$ |
-|<b>PR</b>| <code>pand sd, sn, sm</code> | $S[sd] \leftarrow S[sn]\ \&\ S[sm]$ |
-|<b>PR</b>| <code>porr sd, sn, sm</code> | $S[sd] \leftarrow S[sn]\ \|\ S[sm]$ |
-|<b>PR</b>| <code>pxor sd, sn, sm</code> | $S[sd] \leftarrow S[sn]\ \^\ \ S[sm]$ |
-|<b>PR</b>| <code>pseq sd, sn, sm</code> | $S[sd] \leftarrow (S[sn] == S[sm])$ |
-|<b>PR</b>| <code>pmov sd, sn</code> | $S[sd] \leftarrow S[sn]$ |
-|<b>PR</b>| <code>paddadd sd, sn, sm, sf</code> | $S[sd] \leftarrow (S[sn] + S[sm]) + S[sf]$ |
-|<b>PR</b>| <code>pxorxor sd, sn, sm, sf</code> | $S[sd] \leftarrow (S[sn]\ \^\ \ S[sm])\ \^\ \ S[sf]$ |
-|<b>PR</b>| <code>pslladd sd, sn, sm, sf</code> | $S[sd] \leftarrow (S[sn] << S[sm]) + S[sf]$ |
-|<b>PR</b>| <code>psrladd sd, sn, sm, sf</code> | $S[sd] \leftarrow (S[sn] >> S[sm]) + S[sf]$ |
-|<b>PI</b>| <code>paddi sd, sn, imm</code> | $S[sd] \leftarrow S[sn] + imm$ |
-|<b>PI</b>| <code>psubi sd, sn, imm</code> | $S[sd] \leftarrow S[sn] - imm$ |
-|<b>PI</b>| <code>pmuli sd, sn, imm</code> | $S[sd] \leftarrow S[sn] * imm$ |
-|<b>PI</b>| <code>pdivi sd, sn, imm</code> | $S[sd] \leftarrow S[sn] \div imm$ |
-|<b>PI</b>| <code>pmodi sd, sn, imm</code> | $S[sd] \leftarrow S[sn]\ \%\ imm$ |
-|<b>PI</b>| <code>pandi sd, sn, imm</code> | $S[sd] \leftarrow S[sn]\ \&\ imm$ |
-|<b>PI</b>| <code>porri sd, sn, imm</code> | $S[sd] \leftarrow S[sn]\ \|\ imm$ |
-|<b>PI</b>| <code>pxori sd, sn, imm</code> | $S[sd] \leftarrow S[sn]\ \^\ \ imm$ |
-|<b>PI</b>| <code>pseqi sd, sn, imm</code> | $S[sd] \leftarrow (S[sn] == imm)$ |
-|<b>PI</b>| <code>pmovi sd, imm</code> | $S[sd] \leftarrow imm$ |
-|<b>T</b>| <code>send sd, rn </code> | $S[sd] \leftarrow R[rn]$ |
-|<b>T</b>| <code>recv sd, rn </code> | $S[sd] \rightarrow R[rn]$ |
+|**V**| <code>ldvw sd, $\pm$imm(sn)</code> | $S[sd] \leftarrow V[S[sn] \pm imm]_{31:0}$ |
+|**V**| <code>ldvh sd, $\pm$imm(sn)</code> | $S[sd] \leftarrow V[S[sn] \pm imm]_{15:0}$ |
+|**V**| <code>ldvb sd, $\pm$imm(sn)</code> | $S[sd] \leftarrow V[S[sn] \pm imm]_{7:0}$ |
+|**V**| <code>stvw sd, $\pm$imm(sn)</code> | $S[sd]_{31:0} \rightarrow V[S[sn] \pm imm]$ |
+|**V**| <code>stvh sd, $\pm$imm(sn)</code> | $S[sd]_{15:0} \rightarrow V[S[sn] \pm imm]$ |
+|**V**| <code>stvb sd, $\pm$imm(sn)</code> | $S[sd]_{7:0} \rightarrow V[S[sn] \pm imm]$ |
+|**PR**| <code>padd sd, sn, sm</code> | $S[sd] \leftarrow S[sn] + S[sm]$ |
+|**PR**| <code>psub sd, sn, sm</code> | $S[sd] \leftarrow S[sn] - S[sm]$ |
+|**PR**| <code>pmul sd, sn, sm</code> | $S[sd] \leftarrow S[sn] * S[sm]$ |
+|**PR**| <code>pdiv sd, sn, sm</code> | $S[sd] \leftarrow S[sn] \div S[sm]$ |
+|**PR**| <code>pmod sd, sn, sm</code> | $S[sd] \leftarrow S[sn]\ \%\ S[sm]$ |
+|**PR**| <code>pand sd, sn, sm</code> | $S[sd] \leftarrow S[sn]\ \& \ S[sm]$ |
+|**PR**>| <code>porr sd, sn, sm</code> | $S[sd] \leftarrow S[sn]\ \|\ S[sm]$ |
+|**PR**| <code>pxor sd, sn, sm</code> | $S[sd] \leftarrow S[sn]\ \^\ \ S[sm]$ |
+|**PR**| <code>pseq sd, sn, sm</code> | $S[sd] \leftarrow (S[sn] == S[sm])$ |
+|**PR**| <code>pmov sd, sn</code> | $S[sd] \leftarrow S[sn]$ |
+|**PR**| <code>paddadd sd, sn, sm, sf</code> | $S[sd] \leftarrow (S[sn] + S[sm]) + S[sf]$ |
+|**PR**| <code>pxorxor sd, sn, sm, sf</code> | $S[sd] \leftarrow (S[sn]\ \^\ \ S[sm])\ \^\ \ S[sf]$ |
+|**PR**| <code>pslladd sd, sn, sm, sf</code> | $S[sd] \leftarrow (S[sn] << S[sm]) + S[sf]$ |
+|**PR**| <code>psrladd sd, sn, sm, sf</code> | $S[sd] \leftarrow (S[sn] >> S[sm]) + S[sf]$ |
+|**PI**| <code>paddi sd, sn, imm</code> | $S[sd] \leftarrow S[sn] + imm$ |
+|**PI**| <code>psubi sd, sn, imm</code> | $S[sd] \leftarrow S[sn] - imm$ |
+|**PI**| <code>pmuli sd, sn, imm</code> | $S[sd] \leftarrow S[sn] * imm$ |
+|**PI**| <code>pdivi sd, sn, imm</code> | $S[sd] \leftarrow S[sn] \div imm$ |
+|**PI**| <code>pmodi sd, sn, imm</code> | $S[sd] \leftarrow S[sn]\ \%\ imm$ |
+|**PI**| <code>pandi sd, sn, imm</code> | $S[sd] \leftarrow S[sn]\ \& \ imm$ |
+|**PI**| <code>porri sd, sn, imm</code> | $S[sd] \leftarrow S[sn]\ \|\ imm$ |
+|**PI**| <code>pxori sd, sn, imm</code> | $S[sd] \leftarrow S[sn]\ \^\ \ imm$ |
+|**PI**| <code>pseqi sd, sn, imm</code> | $S[sd] \leftarrow (S[sn] == imm)$ |
+|**PI**| <code>pmovi sd, imm</code> | $S[sd] \leftarrow imm$ |
+|**T**| <code>send sd, rn </code> | $S[sd] \leftarrow R[rn]$ |
+|**T**| <code>recv sd, rn </code> | $S[sd] \rightarrow R[rn]$ |
 
 - Pseudo instrucciones
 
 | tipo | instruccion | descripcion | representación |
 |------|-------------|-------------|----------------|
-|<b>F</b>| <code>call imm</code>  | $R[ra] \leftarrow PC$; $PC \leftarrow PC+imm$ | <code>jal ra, imm</code> |
-|<b>B</b>| <code>beqz rn, imm </code>  | if ($R[rn] == 0$) $PC \leftarrow PC + (imm << 2)$ | <code>beq rn, zero, imm</code> |
-|<b>J</b>| <code>jmp imm</code>  | $R[zero] \leftarrow PC$; $PC \leftarrow PC+imm$ | <code>jal zero, imm</code> |
-|<b>R</b>| <code>ret</code>  | $R[pc] \leftarrow R[ra]$ | <code>mov pc, ra</code> |
-|<b>R</b>| <code>nop</code>  | $R[zero] \leftarrow R[zero] + R[zero]$ | <code>add zero, zero, zero</code> |
-|<b>R</b>| <code>seqz rd, rn </code>  | $R[rd] \leftarrow (R[rn] == R[zero])$ | <code>seq rd, rn, zero</code> |
+|**F**| <code>call imm</code>  | $R[ra] \leftarrow PC$; $PC \leftarrow PC+imm$ | <code>jal ra, imm</code> |
+|**B**| <code>beqz rn, imm </code>  | if ($R[rn] == 0$) $PC \leftarrow PC + (imm << 2)$ | <code>beq rn, zero, imm</code> |
+|**J**| <code>jmp imm</code>  | $R[zero] \leftarrow PC$; $PC \leftarrow PC+imm$ | <code>jal zero, imm</code> |
+|**R**| <code>ret</code>  | $R[pc] \leftarrow R[ra]$ | <code>mov pc, ra</code> |
+|**R**| <code>nop</code>  | $R[zero] \leftarrow R[zero] + R[zero]$ | <code>add zero, zero, zero</code> |
+|**R**| <code>seqz rd, rn </code>  | $R[rd] \leftarrow (R[rn] == R[zero])$ | <code>seq rd, rn, zero</code> |
 |**I**| <code>la rd, addr</code> | $R[rd] \leftarrow addr$ | <code>movi rd, addr</code> |
 |**I**| <code>li rd, imm</code> | $R[rd], \leftarrow imm$ | <code>movi rd, imm</code> |
 |**PI**| <code>pla sd, addr</code> | $S[sd] \leftarrow addr$ | <code>pmovi sd, addr</code> |
 |**PI**| <code>pli sd, imm</code> | $S[sd], \leftarrow imm$ | <code>pmovi sd, imm</code> |
 
-<b>NOTAS</b>:
+**NOTAS**:
 
 - Las notaciones $R[...]$, $M[...]$, $S[...]$, $V[...]$ significan accesos a registros, memoria, registros seguros y boveda, respectivamente.
 - En las instrucciones **J** y **B** el valor del inmediato representa la distancia de salto hacia una instruccion con un *label* (generalmente calculada por el compilador). Esta se calcula $imm = instr[j] - instr[i] $; donde $i$ representa el indice de la instruccion actual y $j$ representa el indice de la instruccion hacia donde se desea saltar.
 - Las instrucciones de tipo **PR** permiten múltiples combinaciones para la selección de operaciones, para esto refierase a las tablas de encodificación para operaciones de ALU primaria y secundaria
 
-<b>TIPOS DE INSTRUCCIONES</b>:
+**TIPOS DE INSTRUCCIONES**:
 
 - Tipo **R**: operaciones aritemeticas y logicas registro-registro
 - Tipo **I**: operaciones aritemeticas y logicas registro-inmediato
