@@ -40,7 +40,10 @@ module data_memory #(
 
     // --- Initialization ---
     initial begin
-        $readmemh("data_init.hex", RAM);
+        for (int i = 0; i < NUM_WORDS-1; i++) begin
+            RAM[i] = 32'h0;
+        end
+        $readmemh("./src/memories/data_mem.hex", RAM);
     end
 
     // --- Synchronous Write (Store) ---

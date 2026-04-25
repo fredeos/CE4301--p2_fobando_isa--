@@ -3,7 +3,8 @@ import os
 
 def get_input_path(filename):
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    return os.path.normpath(os.path.join(current_dir, "..", "memories", filename))
+    # Ajustamos para buscar en la carpeta de salida o memorias según tu flujo
+    return os.path.normpath(os.path.join(current_dir, "..", "output", filename))
 
 def main():
     parser = argparse.ArgumentParser(description='Extrae datos de memoria a binario')
@@ -14,44 +15,63 @@ def main():
 
     args = parser.parse_args()
     
+    # Intenta buscar en output primero (donde Verilog guarda el modificado)
     mem_path = get_input_path(args.memory)
     start_addr = int(args.address, 16)
     word_start = start_addr // 4
-    num_words = (args.size + 3) // 4 # Cuántas palabras cubrir
+    num_words = (args.size + 3) // 4 
 
     if not os.path.exists(mem_path):
-        print(f"Error: No se encuentra el archivo de memoria en {mem_path}")
+        print(f"Error: No se encuentra el archivo en {mem_path}")
         return
 
     extracted_bytes = bytearray()
     
     with open(mem_path, 'r') as f:
-        # Ignorar líneas de dirección (@) y espacios
-        lines = [l.strip() for l in f if l.strip() and not l.startswith('@')]
+        # CORRECCIÓN AQUÍ: 
+        # 1. Filtramos líneas vacías, las que empiezan con '@' y las que empiezan con '//'
+        lines = []
+        for l in f:
+            clean_l = l.strip()
+            # Saltamos comentarios puros o líneas de dirección
+            if not clean_l or clean_l.startswith('@') or clean_l.startswith('//'):
+                continue
+            
+            # 2. Si la línea tiene datos pero un comentario al final, lo cortamos
+            data_part = clean_l.split('//')[0].strip()
+            if data_part:
+                lines.append(data_part)
         
         # Extraer el segmento solicitado
         target_words = lines[word_start : word_start + num_words]
         
         for hex_word in target_words:
-            val = int(hex_word, 16)
-            # Descomponer de 32-bit word a bytes (Little Endian)
-            extracted_bytes.append(val & 0xFF)
-            extracted_bytes.append((val >> 8) & 0xFF)
-            extracted_bytes.append((val >> 16) & 0xFF)
-            extracted_bytes.append((val >> 24) & 0xFF)
+            try:
+                val = int(hex_word, 16)
+                # Descomponer de 32-bit word a bytes (Little Endian)
+                extracted_bytes.append(val & 0xFF)
+                extracted_bytes.append((val >> 8) & 0xFF)
+                extracted_bytes.append((val >> 16) & 0xFF)
+                extracted_bytes.append((val >> 24) & 0xFF)
+            except ValueError:
+                print(f"Advertencia: Saltando valor no hexadecimal: {hex_word}")
+                continue
 
-    # El output final se guarda en la carpeta actual o donde especifiques
+    # Guardar el archivo final (PNG/BIN)
     with open(args.output, 'wb') as f:
         f.write(extracted_bytes[:args.size])
     
     print(f"--- Extracción Completada ---")
-    print(f"Archivo de memoria consultado: {args.memory}")
-    print(f"Bytes guardados en: {args.output}")
+    print(f"Archivo procesado: {mem_path}")
+    print(f"Bytes extraídos: {len(extracted_bytes[:args.size])}")
+    print(f"Archivo de salida: {args.output}")
 
 if __name__ == "__main__":
     main()
 
 
 """
-python extract_data.py --memory ../memories/data_mem.hex --address 0x0 --size 247 --output ../test_files/bedrock_recuperada.png
+cd src\data_utilities
+python extract_data.py --memory ../output/bedrock_mod.hex --address 0x0 --size 247 --output ../test_files/bedrock_recuperada.png
+cd ../
 """
