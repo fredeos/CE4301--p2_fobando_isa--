@@ -8,7 +8,7 @@ module ssu (
 always_comb begin
     // 1. Decodificar tipo de instruccion
     case (opcode)
-        5'b00010: begin // Tipo PD: instrucciones aritmeticas o logicas protegidas registro-registro
+        5'b00010: begin // Tipo PR: instrucciones aritmeticas o logicas protegidas registro-registro
             ignore = login;
         end
 
@@ -16,11 +16,15 @@ always_comb begin
             ignore = login;
         end
 
-        5'b00101: begin // Tipo V: instrucciones de acceso a boveda
+        5'b00110: begin // Tipo V: lectura de boveda
             ignore = login;
         end
 
-        5'b00110: begin // Tipo T: instrucciones de traslado de datos entre banco de registros y banco seguro
+        5'b00111: begin // Tipo V: escritura a boveda
+            ignore = login;
+        end
+
+        5'b10000: begin // Tipo T: instrucciones de traslado de datos entre banco de registros y banco seguro
             ignore = login;
         end
         
