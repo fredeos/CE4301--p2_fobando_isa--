@@ -13,51 +13,51 @@ always_comb begin
     // 1. Decodificar para ALU principal
     case (func4)
         4'b0000: begin // SLL (<<)
-            pALUControl = 4'b1000;
-        end
-
-        4'b0001: begin // SRL (>>)
-            pALUControl = 4'b1001;
-        end
-
-        4'b0010: begin // ADD (+)
             pALUControl = 4'b0000;
         end
 
-        4'b0011: begin // SUB (-)
+        4'b0001: begin // SRL (>>)
             pALUControl = 4'b0001;
         end
 
-        4'b0100: begin // MUL (*)
+        4'b0010: begin // ADD (+)
             pALUControl = 4'b0010;
         end
 
-        4'b0101: begin // DIV (/)
+        4'b0011: begin // SUB (-)
             pALUControl = 4'b0011;
         end
 
-        4'b0110: begin // MOD (%)
+        4'b0100: begin // MUL (*)
             pALUControl = 4'b0100;
         end
 
-        4'b0111: begin // AND (&)
+        4'b0101: begin // DIV (/)
             pALUControl = 4'b0101;
         end
 
-        4'b1000: begin // ORR (|)
+        4'b0110: begin // MOD (%)
             pALUControl = 4'b0110;
         end
 
-        4'b1001: begin // XOR (^)
+        4'b0111: begin // AND (&)
             pALUControl = 4'b0111;
         end
 
-        4'b1100: begin // SEQZ: permite hacer NOT con booleanos
+        4'b1000: begin // ORR (|)
+            pALUControl = 4'b1000;
+        end
+
+        4'b1001: begin // XOR (^)
+            pALUControl = 4'b1001;
+        end
+
+        4'b1010: begin // SEQ
             pALUControl = 4'b1010;
         end
 
         default: begin 
-            pALUControl = 4'b0000;
+            pALUControl = 4'b0010;
         end
         
     endcase
@@ -68,7 +68,7 @@ always_comb begin
             sALUControl = 1'b0;
         end
 
-        3'b100: begin // XOR (-)
+        3'b001: begin // XOR (-)
             sALUControl = 1'b1;
         end
 
@@ -78,9 +78,11 @@ always_comb begin
     endcase
 
     // 3. Casos de instrucciones de memoria y branch
-    if (opcode == 5'b00100) pALUControl = (func4[0]) ? 4'b0000 : 4'b0001; // Tipo M
-    else if (opcode == 5'b01000) pALUControl = 4'b0001;                   // Tipo B
-    else if (opcode == 5'b01001) pALUControl = 4'b0000;                   // Tipo F/J
+    if (opcode == 5'b00100 || opcode == 5'b00101) pALUControl = (func4[0]) ? 4'b0011 : 4'b0010;      // Tipo M
+    else if (opcode == 5'b00110 || opcode == 5'b00111) pALUControl = (func4[0]) ? 4'b0011 : 4'b0010; // Tipo V
+    else if (opcode == 5'b01000 || opcode == 5'b01001) pALUControl = 4'b0011;                        // Tipos B,F,J
+    else if (opcode == 5'b10000) pALUControl = 4'b0010; // Tipo T
+    else if (opcode == 5'b10001) pALUControl = 4'b0011; // Tipo S
 
 end
 

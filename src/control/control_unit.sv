@@ -1,71 +1,47 @@
 module control_unit (
     input  logic  [4:0] opcode,
     input  logic  [3:0] func4,
-    input  logic [21:0] source,
+    input  logic  [21:0] source,
+    // Señales de control de salida en WB
     output logic  [1:0] MemToReg,
-    output logic  [1:0] RegWrite,
-    output logic  [1:0] MemWrite,
-    output logic        BranchSel,
-    output logic  [3:0] Branch,
-    output logic  [1:0] Session,
-    output logic        ALUOut,
-    output logic  [4:0] ALUControl,
-    output logic        ALUSrcB,
-    output logic  [1:0] ALUSrcA,
-    output logic  [1:0] RSel,
-    output logic  [2:0] ImmSel,
-    output logic        RegSrc,
-    output logic        SecSrc
+    // Señales de control de escritura en WB
+    output logic  [1:0] RegWrite, // write enable = [0]: secure memory, [1]: register file
+    // Señales de control en MEM
+    output logic  [1:0] MemWrite, // write enable = [0]: vault, [1]: data memory
+    output logic  [7:0] MemBytes, // seleccion de bytes para lectura o escritura = [3:0] vault, [7:4] data memory
+    // Señales de control saltos y branch
+    output logic        JalSel,   // seleccion de PC+4 para instrucciones J
+    output logic  [4:0] Branch,   // condiciones de salto para instrucciones J, B
+    // Señales de control de session
+    output logic  [1:0] Session,  // [0]: login, [1]: logout (quit)
+    // Señales de control para EX
+    output logic        ALUOut,    // salida de ALU (pALU | sALU)
+    output logic  [4:0] ALUControl,// operaciones de ALU = [3:0]: pALU, [4]: sALU
+    output logic        ALUSrcB,   // selección de operando B para pALU
+    output logic  [1:0] ALUSrcA,   // selección de operando A para pALU
+    // Señales de control para ID
+    output logic  [1:0] RSel,     // selección de registros = [0]: (rn | sn), [1]: ((rm | rd) | (sm | sd))
+    output logic  [2:0] ImmSel,   // selección de extensión de inmediatos
+    output logic        RegSrc,   // selección de registro 2 (rm | rd)
+    output logic        SecSrc    // seleccion de registro 2 (sm | sd)
 );
     // Senales internas de la unidad de control
-    logic [28:0] control; // un buffer grande para la decodificacion de cada senal de control
+    logic [4:0] rd, rn, rm;
+    logic [2:0] sd, sn, sm, sf, func3;
+    logic [6:0] func7;
 
-    // --- Logica combinacionl ---
-    // Revisar isa.md para comprender la encodifcacion para cada instruccion
-    always_comb begin
-        // 1. Decodificar segun el tipo de instruccion (opcode)
-        case (opcode)
-            5'b00000: begin // Tipo R: instrucciones aritmeticas o logicas registro-registro
-                
-            end
+    assign rd = source[4:0];
+    assign rn = source[9:5];
+    assign rm = source[14:10];
+    
+    assign sd = source[2:0];
+    assign sn = source[5:3];
+    assign sm = source[8:6];
+    assign sf = source[11:9];
+    assign func3 = source[14:12];
 
-            5'b00001: begin // Tipo I: instrucciones aritmeticas o logicas registro-inmediato
+    assign func7 = source[21:15];
 
-            end
-
-            5'b00010: begin // Tipo PR: instrucciones aritmeticas o logicas protegidas registro-registro
-
-            end
-
-            5'b00011: begin // Tipo PI: instrucciones aritmeticas o logicas protegidas registro-inmediato
-
-            end
-
-            5'b00100: begin // Tipo M: instrucciones de memoria
-
-            end
-
-            5'b00101: begin // Tipo V: instrucciones de acceso a boveda
-
-            end
-
-            5'b00110: begin // Tipo T: instrucciones de traslado de datos entre banco de registros y banco seguro
-
-            end
-
-            5'b01000: begin // Tipo B: instrucciones control de flujo(branches)
-
-            end
-
-            5'b01001: begin // Tipo F/J: instrucciones control de flujo(saltos largos relativos al PC)
-
-            end
-
-            default: begin
-                control = 29'b00_00_00_0_0000_00_0_00000_000_00_000_00;
-            end
-        endcase
-
-    end
+    // Instanciar decodificadores de control
 
 endmodule
