@@ -350,27 +350,27 @@
 Para definir y hacer llamadas a funciones en programas de ensamblador, se deben utilizar llamadas a funciones utilizando `call`, además cada función debe cumplir con la convención de uso y guardado de registros para garantizar la integridad de los datos entre llamadas. Para este efecto se manipula el stack para almacenar registros en memoria al inicio de una llamada y restaurarlos al finalizar la función. El convenio de registros establecido asigna los registros `p0-p8` para argumentos y retorno de funciones, `r0-r15` para uso general, `ra` para direcciones de retorno y `sp` para puntero del stack en memoria.
 
 ```asm
-__init__:
-    movi r1, 4
-    movi p0, 7
-    add  p1, p0, r1
-    call sum
-    mul r1, p0, r1
-
-// sum(a,b) => p0:a, p1:b, p0:a*2+b
-sum:
-    addi sp, sp, 8
-    stw ra, 0(sp)
-    stw r1, 4(sp)
-
-    li r1, 2
-    mul r1, p0, r1
-    add p0, r1, p1 
-
-    ldw r1, 4(sp)
-    ldw ra, 0(sp)
-    addi sp, sp, -8
-    ret
+1    __init__:
+2        movi r1, 4
+3        movi p0, 7
+4        add  p1, p0, r1
+5        call sum
+6        mul r1, p0, r1
+7
+8    // sum(a,b) => p0:a, p1:b, p0:a*2+b
+9    sum:
+10       addi sp, sp, 8
+11       stw ra, 0(sp)
+12       stw r1, 4(sp)
+13
+14       li r1, 2
+15       mul r1, p0, r1
+16       add p0, r1, p1 
+17
+18       ldw r1, 4(sp)
+19       ldw ra, 0(sp)
+20       addi sp, sp, -8
+21       ret
 ```
 
 Notese que únicamente se están guardando y restaurando los registros de proposito general requeridos para función.
