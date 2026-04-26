@@ -84,7 +84,7 @@ always_comb begin
         5'b10000: begin // Tipo T
             control = 27'b0100_00_00000000_00_1001_0000_000;
             if (funct4 == 4'b0000)      control = 27'b0101_00_00000000_00_1010_1100_000; // send
-            else if (funct4 == 4'b0000) control = 27'b0110_00_00000000_00_1001_1000_000; // recv
+            else if (funct4 == 4'b0001) control = 27'b0110_00_00000000_00_1001_0100_000; // recv
         end
 
         5'b10001: begin // Tipo S

@@ -42,6 +42,33 @@ module control_unit (
 
     assign func7 = source[21:15];
 
-    // Instanciar decodificadores de control
+    // --- Instanciar decodificadores de control ---
+
+    // 1. Decodificador principal
+    main_decoder _main_deco (
+        .opcode(opcode), .func4(func4),
+        .MemToReg(MemToReg),
+        .RegWrite(RegWrite),
+        .MemWrite(MemWrite), .MemBytes(MemBytes),
+        .JalSel(JalSel),
+        .Session(Session),
+        .ALUOut(ALUOut), .ALUSrcB(ALUSrcB), .ALUSrcA(ALUSrcA),
+        .RSel(RSel),
+        .ImmSel(ImmSel),
+        .RegSrc(RegSrc),
+        .SecSrc(SecSrc)
+    );
+
+    alu_decoder _alu_deco (
+        .opcode(opcode), .func4(func4), .func3(func3), .func7(func7),
+        .pALUControl(ALUControl[3:0]),
+        .sALUControl(ALUControl[4])
+    );
+
+    branch_decoder _branch_deco (
+        .opcode(opcode), .func4(func4),
+        .rd(rd), .rn(rn),
+        .Branch(Branch)
+    );
 
 endmodule
