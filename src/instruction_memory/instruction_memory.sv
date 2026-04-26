@@ -26,7 +26,7 @@ module instruction_memory #(
     initial begin
         // Initialize memory with NOPs (addi x0, x0, 0) to avoid undefined behavior
         for (int i = 0; i < NUM_WORDS; i++) begin
-            INSTRUCTIONS[i] = 32'h00000013; 
+            INSTRUCTIONS[i] = 32'h00200000; 
         end
         // Load the program from the HEX file
         $readmemh("./src/memories/instr_mem.hex", INSTRUCTIONS);
