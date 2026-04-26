@@ -12,8 +12,7 @@ module tb_cond_unit ();
     initial begin
         $dumpfile("./output/wave.vcd");
         $dumpvars(0, tb_cond_unit);
-
-        $display("[Incio del testbench]");
+        $display("[Inicio del testbench]");
 
         nf = 0; zf = 0; cf = 0; vf = 0;
         cond = 3'b100; // GE
