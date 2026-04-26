@@ -1,4 +1,4 @@
-module branch_decode (
+module branch_decoder (
     input  logic [4:0] opcode,
     input  logic [3:0] func4,
     input  logic [4:0] rd,

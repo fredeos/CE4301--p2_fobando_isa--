@@ -19,7 +19,7 @@ end
 assign valid = (attempts < max);
 
 // 1. Comparador de ciclos para contar tiempo de espera despues de muchos intentos
-cycle_comparer _timeout #(.width(width)) (.clk(clk), .en(~valid), .rst(rst), .clr(timeout), .tol(tOut), .state(timeout));
+cycle_comparer #(.width(width)) _timeout (.clk(clk), .en(~valid), .rst(rst), .clr(timeout), .tol(tOut), .state(timeout));
 
 // --- Flip-flop para registro de session ---
 always_ff @(posedge clk, posedge rst) begin
@@ -29,7 +29,7 @@ end
 
 assign logout_clr = expired | logout;
 // 2. Comparador de ciclos para contar tiempo de vida de una sesion con hardware seguro
-cycle_comparer _logout #(.width(width)) (.clk(clk), .en(session), .rst(rst), .clr(logout_clr), .tol(tSes), .state(expired));
+cycle_comparer #(.width(width)) _logout (.clk(clk), .en(session), .rst(rst), .clr(logout_clr), .tol(tSes), .state(expired));
 
 assign sesff_clr = logout | expired;
 assign sesff_en  = login & valid;
