@@ -9,7 +9,7 @@ logic zf, cf, nf, vf, ge, comp;
 
 assign cond = Branch[4:2];
 assign {nf, zf, cf, vf} = flags;
-assign ge = ~(neg ^ overflow);
+assign ge = ~(nf ^ vf);
 
 always_comb begin
     // 1. Decodificar tipo de comparacion

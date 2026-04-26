@@ -13,6 +13,9 @@ build:
 ControlUnit:
 	iverilog -g2012 -o ./output/sim.out ${control_unit} ${dirCONTROLtb}/tb_control_unit.sv
 
+CondUnit:
+	iverilog -g2012 -o ./output/sim.out ${cond_unit} ${dirCONTROLtb}/tb_cond_unit.sv
+	
 run:
 	vvp ./output/sim.out
 	gtkwave ./output/wave.vcd
