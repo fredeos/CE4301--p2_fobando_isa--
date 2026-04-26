@@ -314,6 +314,13 @@
 | 0000  | `send` |
 | 0001  | `recv` |
 
+- Especificación de operación (para instrucciones **S** )
+
+| func4 | operacion |
+|-------|-----------|
+| 0000  | `login` |
+| 0001  | `quit` |
+
 - Especificación de operación para ALU primaria (para instrucciones **R**, **I**, **PR**, **PI** )
 
 | func4 | operacion |
