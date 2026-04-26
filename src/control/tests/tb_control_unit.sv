@@ -1,5 +1,5 @@
 module tb_control_unit ();
-    localparam N = 2;
+    localparam N = 16;
     logic [31:0] instructions [N-1:0];
     logic [31:0] instr;
 
@@ -35,15 +35,29 @@ module tb_control_unit ();
 
         clk = 0;
         // Configurar instrucciones en la memoria
-        instructions[0] = 32'h01181480; // add p0, r2, r3
-        instructions[1] = 32'h00000000;
+        instructions[0] = 32'h00000080; // nop
+        instructions[1] = 32'h01181480; // add p0, r2, r3
+        instructions[2] = 32'h00708d03; // @muli pc, ra, 7
+        instructions[3] = 32'hff59f110; // bge r5, r7, -4
+        instructions[4] = 32'h003138c8; // ldb r0,- 3(sp) ldw rd, +- -4(rn)
+        instructions[5] = 32'h00414e0a; // stw r5,+ 4(sp)
+        instructions[6] = 32'h00000512; // jal ra, 11
+        instructions[7] = 32'hbeef0022; // login 0xBEEF0
+        instructions[8] = 32'h00000062; // quit
+        instructions[9] = 32'h00022144; // pdiv  ax, bx, cx
+        instructions[10] = 32'h00061406;// pslli fx, ax, 6
+        instructions[11] = 32'h0051A085;// @paddxor ax, fx, bx, cx
+        instructions[12] = 32'hfffe650c;// ldvh bx,+ -2(dx)
+        instructions[13] = 32'hfffb68ce;// stvb cx,- -5(dx)
+        instructions[14] = 32'h00088820;// send cx, r3
+        instructions[15] = 32'h00053860;// recv r0, fx
 
         // Iteracion sobre las instrucciones
         $display("[Inicio del testbench]");
-        for (integer i = 0; i < 1; i++) begin
+        for (int i = 0; i < N; i++) begin
             instr = instructions[i];
             #10;
-            $display("-----------------------[INSTR:0x%h]-----------------------", instr);
+            $display("-----------------------[INSTR[%d]:0x%h]-----------------------", i, instr);
             $display("MemToReg(WB mux) = %b", MemToReg);
             $display("RegFile WE = %b", RegWrite[1]);
             $display("SecMem WE = %b", RegWrite[0]);

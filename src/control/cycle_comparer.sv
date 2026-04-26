@@ -1,4 +1,4 @@
-module cycle_count #(parameter width = 32)(
+module cycle_comparer #(parameter width = 32)(
     input  logic clk, en, rst, clr,
     input  logic [width-1:0] tol,
     output logic state

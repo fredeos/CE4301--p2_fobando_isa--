@@ -7,6 +7,9 @@ module alu_decoder (
     output logic       sALUControl
 );
 
+logic Mfunc4;
+assign Mfunc4 = func4[0];
+
 // --- Logica combinancional ---
 // (Decodificadores)
 always_comb begin
@@ -78,9 +81,9 @@ always_comb begin
     endcase
 
     // 3. Casos de instrucciones de memoria y branch
-    if (opcode == 5'b00100 || opcode == 5'b00101) pALUControl = (func4[0]) ? 4'b0011 : 4'b0010;      // Tipo M
-    else if (opcode == 5'b00110 || opcode == 5'b00111) pALUControl = (func4[0]) ? 4'b0011 : 4'b0010; // Tipo V
-    else if (opcode == 5'b01000 || opcode == 5'b01001) pALUControl = 4'b0011;                        // Tipos B,F,J
+    if (opcode == 5'b00100 || opcode == 5'b00101) pALUControl = (Mfunc4) ? 4'b0011 : 4'b0010;      // Tipo M
+    else if (opcode == 5'b00110 || opcode == 5'b00111) pALUControl = (Mfunc4) ? 4'b0011 : 4'b0010; // Tipo V
+    else if (opcode == 5'b01000 || opcode == 5'b01001) pALUControl = 4'b0011;                      // Tipos B,F,J
     else if (opcode == 5'b10000) pALUControl = 4'b0010; // Tipo T
     else if (opcode == 5'b10001) pALUControl = 4'b0011; // Tipo S
 

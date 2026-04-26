@@ -24,6 +24,9 @@ module main_decoder (
 );
 
 logic [26:0] control;
+logic [2:0] Mfunc4;
+
+assign Mfunc4 = func4[3:1];
 
 // --- Logica combinacional ---
 always_comb begin
@@ -42,35 +45,35 @@ always_comb begin
         end
 
         5'b00011: begin // Tipo PI
-            control = 27'b0101_00_00000000_00_0110_0000_101;
+            control = 27'b0101_00_00000000_00_1110_0000_101;
         end
 
         5'b00100: begin // Tipo M (load)
             control = 27'b1010_00_00000000_00_1110_1100_001; // Caso por defecto
-            if (func4[3:1] == 3'b100)      control = 27'b1010_00_11110000_00_1110_1100_001; // ldw
-            else if (func4[3:1] == 3'b010) control = 27'b1010_00_00110000_00_1110_1100_001; // ldh
-            else if (func4[3:1] == 3'b001) control = 27'b1010_00_00010000_00_1110_1100_001; // ldb
+            if (Mfunc4 == 3'b100)      control = 27'b1010_00_11110000_00_1110_1100_001; // ldw
+            else if (Mfunc4 == 3'b010) control = 27'b1010_00_00110000_00_1110_1100_001; // ldh
+            else if (Mfunc4 == 3'b001) control = 27'b1010_00_00010000_00_1110_1100_001; // ldb
         end
 
         5'b00101: begin // Tipo M (store)
             control = 27'b1000_10_00000000_00_1110_1110_001; // Caso por defecto
-            if (func4[3:1] == 3'b100)      control = 27'b1000_10_11110000_00_1110_1110_001; // stw
-            else if (func4[3:1] == 3'b010) control = 27'b1000_10_00110000_00_1110_1110_001; // sth
-            else if (func4[3:1] == 3'b001) control = 27'b1000_10_00010000_00_1110_1110_001; // stb
+            if (Mfunc4 == 3'b100)      control = 27'b1000_10_11110000_00_1110_1110_001; // stw
+            else if (Mfunc4 == 3'b010) control = 27'b1000_10_00110000_00_1110_1110_001; // sth
+            else if (Mfunc4 == 3'b001) control = 27'b1000_10_00010000_00_1110_1110_001; // stb
         end
 
         5'b00110: begin // Tipo V (load)
             control = 27'b0001_00_00000000_00_1110_0000_101; // Caso por defecto
-            if (func4[3:1] == 3'b100)      control = 27'b0001_00_00001111_00_1110_0000_101; // ldvw
-            else if (func4[3:1] == 3'b010) control = 27'b0001_00_00000011_00_1110_0000_101; // ldvh
-            else if (func4[3:1] == 3'b001) control = 27'b0001_00_00000001_00_1110_0000_101; // ldvb
+            if (Mfunc4 == 3'b100)      control = 27'b0001_00_00001111_00_1110_0000_101; // ldvw
+            else if (Mfunc4 == 3'b010) control = 27'b0001_00_00000011_00_1110_0000_101; // ldvh
+            else if (Mfunc4 == 3'b001) control = 27'b0001_00_00000001_00_1110_0000_101; // ldvb
         end
 
         5'b00111: begin // Tipo V (store)
             control = 27'b0000_01_00000000_00_1110_0001_101;
-            if (func4[3:1] == 3'b100)      control = 27'b0000_01_00001111_00_1110_0001_101; // stvw
-            else if (func4[3:1] == 3'b010) control = 27'b0000_01_00000011_00_1110_0001_101; // stvh
-            else if (func4[3:1] == 3'b001) control = 27'b0000_01_00000001_00_1110_0001_101; // stvb
+            if (Mfunc4 == 3'b100)      control = 27'b0000_01_00001111_00_1110_0001_101; // stvw
+            else if (Mfunc4 == 3'b010) control = 27'b0000_01_00000011_00_1110_0001_101; // stvh
+            else if (Mfunc4 == 3'b001) control = 27'b0000_01_00000001_00_1110_0001_101; // stvb
         end
 
         5'b01000: begin // Tipo B
