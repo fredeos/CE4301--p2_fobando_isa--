@@ -129,7 +129,7 @@
 |**PI**| <code>pseqi sd, sn, imm</code> | $S[sd] \leftarrow (S[sn] == imm)$ |
 |**PI**| <code>pmovi sd, imm</code> | $S[sd] \leftarrow imm$ |
 |**T**| <code>send sd, rn </code> | $S[sd] \leftarrow R[rn]$ |
-|**T**| <code>recv sd, rn </code> | $S[sd] \rightarrow R[rn]$ |
+|**T**| <code>recv rd, sm </code> | $R[rd] \leftarrow S[sm]$ |
 
 - Pseudo instrucciones
 
@@ -163,7 +163,7 @@
 - Tipo **V**: operaciones de boveda
 - Tipo **PR**: operaciones aritemeticas y logicas sobre registros seguros
 - Tipo **PI**: operaciones aritemeticas y logicas sobre registro seguro e inmediato
-- Tipo **T**: operaciones de transporte
+- Tipo **T**: operaciones de traslado
 
 ### Formato de encodificación de instrucciones
 
@@ -283,8 +283,10 @@
 | P | 0 | bit de seguridad |
 | opcode | 1-5 | código de instrucción |
 | func4 | 6-9 | funcionalidad |
-| sd | 10-12 | dir. registro 1|
-| rn | 15-19 | dir. registro 2 |
+| sd | 10-12 | dir. registro 1 (send) |
+| rd | 10-14 | dir. registro 1 (recv) |
+| rn | 15-19 | dir. registro 2 (send) |
+| sm | 16-18 | dir. registro 3 (recv) |
 
 ### Tablas de encodificación
 
@@ -292,16 +294,16 @@
 
 | opcode |  instrucciones  | tipo |
 |--------|-----------------|------|
-| 00000  |   `add`    |**R**|
-| 00001  |   `addi`   |**I**|
-| 00010  |   `padd`   |**PR**|
-| 00011  |   `paddi`  |**PI**|
+| 00000  |   `add`, `sub`, etc    |**R**|
+| 00001  |   `addi`, `subi`, etc  |**I**|
+| 00010  |   `padd`, `psub`, etc  |**PR**|
+| 00011  |   `paddi`, `psubi`, etc|**PI**|
 | 00100  |`ldw`,`ldh`,`ldb`|**M**|
 | 00101  |`stw`,`sth`,`stb`|**M**|
 | 00110  |`ldvw`,`ldvh`,`ldvb`|**V**|
 | 00111  |`stvw`,`stvh`,`stvb`|**V**|
-| 01000  |   `beq`   |**B**|
-| 01001  |   `jal`   |**J**/**F**|
+| 01000  |   `beq`, `bge`, etc   |**B**|
+| 01001  |   `jal`, `call`   |**J**/**F**|
 | 10000  |   `send`, `recv`   |**T**|
 | 10001  |   `login`, `quit`  |**S**|
 
@@ -391,4 +393,4 @@ Para poder acceder al hardware de seguridad se necesita de iniciar sesion, para 
 10  recv dx, r4     # esta instruccion nunca va a ejecutarse
 ```
 
-En caso de haber cerrado sesion, el hardware tiene un limite de ciclos despues de el cuál el hardware de seguridad es deshabilitado.
+En caso de no haber cerrado sesion, el hardware tiene un limite de ciclos despues de el cuál el hardware de seguridad es deshabilitado.
