@@ -1,11 +1,30 @@
+# --- Directorios de unidades de control ---
+dirCONTROL = ./src/control
+dirCONTROLtb = ${dirCONTROL}/tests
+
+control_unit = ${dirCONTROL}/control_unit.sv ${dirCONTROL}/branch_decoder.sv ${dirCONTROL}/main_decoder.sv ${dirCONTROL}/alu_decoder.sv # unidad de control
+admin_unit = ${dirCONTROL}/admin_unit.sv ${dirCONTROL}/cycle_comparer.sv	# unidad de administrador (sessiones de hardware seguro)
+cond_unit = ${dirCONTROL}/cond_unit.sv	# unidad de condicionales y saltos (cambios al PC)
+ssu = ${dirCONTROL}/ssu.sv				# unidad de seleccion segura (instrucciones @)
 # --- Makefile ---
 
 build:
 	iverilog -g2012 -o ./src/output/sim.out ./src/data_memory.sv ./src/data_memory_tb.sv
 
+ControlUnit:
+	iverilog -g2012 -o ./output/sim.out ${control_unit} ${dirCONTROLtb}/tb_control_unit.sv
+
+CondUnit:
+	iverilog -g2012 -o ./output/sim.out ${cond_unit} ${dirCONTROLtb}/tb_cond_unit.sv
+
+AdminUnit:
+	iverilog -g2012 -o ./output/sim.out ${admin_unit} ${dirCONTROLtb}/tb_admin_unit.sv
+
+SSU:
+	iverilog -g2012 -o ./output/sim.out ${ssu} ${dirCONTROLtb}/tb_ssu.sv
 run:
 	vvp ./src/output/sim.out
 	gtkwave ./src/output/data_memory_tb.vcd
 
 clean:
-	rm -rf ./src/output/*
+	rm ./output/*.out ./output/*.vcd
