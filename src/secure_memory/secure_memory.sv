@@ -19,6 +19,8 @@ module secure_memory #(
     output logic [DATA_WIDTH-1:0] rd3  // Dato leído 3
 );
 
+    localparam logic [ADDR_WIDTH-1:0] AX_REG = '0;
+
     logic [DATA_WIDTH-1:0] mem [0:DEPTH-1]; // Registros seguros
     integer i;                              // Índice de reset
 
@@ -28,7 +30,7 @@ module secure_memory #(
             for (i = 0; i < DEPTH; i = i + 1) begin
                 mem[i] <= '0;
             end
-        end else if (we) begin
+        end else if (we && (wa != AX_REG)) begin
             // Escribe dato seguro
             mem[wa] <= wd;
         end
@@ -36,9 +38,9 @@ module secure_memory #(
 
     always_comb begin
         // Lectura write-first
-        rd1 = (we && (wa == ra1)) ? wd : mem[ra1];
-        rd2 = (we && (wa == ra2)) ? wd : mem[ra2];
-        rd3 = (we && (wa == ra3)) ? wd : mem[ra3];
+        rd1 = (ra1 == AX_REG) ? '0 : ((we && (wa == ra1)) ? wd : mem[ra1]);
+        rd2 = (ra2 == AX_REG) ? '0 : ((we && (wa == ra2)) ? wd : mem[ra2]);
+        rd3 = (ra3 == AX_REG) ? '0 : ((we && (wa == ra3)) ? wd : mem[ra3]);
     end
 
 endmodule

@@ -68,6 +68,22 @@ module tb_secure_memory;
         check_equal(rd2, 32'h00000000, "reset reg1");
         check_equal(rd3, 32'h00000000, "reset reg7");
 
+        // ax/reg0 es solo lectura y siempre devuelve 0
+        @(negedge clk);
+        wa = 3'd0;
+        wd = 32'hFFFFFFFF;
+        ra1 = 3'd0;
+        we = 1'b1;
+        #1;
+        check_equal(rd1, 32'h00000000, "ax write-first stays zero");
+
+        @(posedge clk);
+        #1;
+        we = 1'b0;
+        ra1 = 3'd0;
+        #1;
+        check_equal(rd1, 32'h00000000, "ax ignores write");
+
         // Escritura en reg1
         @(negedge clk);
         wa = 3'd1;
