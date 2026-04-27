@@ -1,11 +1,11 @@
 # --- Makefile ---
 
 build:
-	iverilog -g2012 -o ./src/output/sim.out ./src/instruction_memory/instruction_memory.sv ./src/instruction_memory/instruction_memory_tb.sv
+	iverilog -g2012 -o ./src/output/sim.out ./src/data_memory/data_memory.sv ./src/data_memory/data_memory_tb.sv
 
 run:
 	vvp ./src/output/sim.out
-	gtkwave ./src/output/instruction_memory_tb.vcd
+	gtkwave ./src/output/data_memory_tb.vcd
 
 clean:
 	rm -rf ./src/output/*

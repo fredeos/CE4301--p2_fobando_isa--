@@ -6,7 +6,7 @@ module data_memory #(
     input  logic        RST,
     // Control signals
     input  logic [31:0] A,    // 32-bit Address from ALUOut
-    input  logic [3:0]  WE,   // Write Enable (Byte-strobe)
+    input  logic WE,          // Write Enable (Byte-strobe)
     input  logic [3:0]  ASM,  // Addressing Selection Mode
     // Data signals
     input  logic [31:0] WD,   // Write Data from RD2
@@ -51,39 +51,42 @@ module data_memory #(
         if (RST) begin
             // Reset logic
         end else begin
-            if (WE[0]) RAM[word_idx][7:0]   <= WD[7:0];
-            if (WE[1]) RAM[word_idx][15:8]  <= WD[15:8];
-            if (WE[2]) RAM[word_idx][23:16] <= WD[23:16];
-            if (WE[3]) RAM[word_idx][31:24] <= WD[31:24];
+            if  (WE == 1) begin
+                if (ASM[0]) RAM[word_idx][7:0]   <= WD[7:0];
+                if (ASM[1]) RAM[word_idx][15:8]  <= WD[15:8];
+                if (ASM[2]) RAM[word_idx][23:16] <= WD[23:16];
+                if (ASM[3]) RAM[word_idx][31:24] <= WD[31:24];
+            end
         end
     end
 
     // --- Asynchronous Read (Load) ---
-    logic [31:0] raw_word;
-    assign raw_word = RAM[word_idx];
+
+    wire bit0 = ASM[0];
+    wire bit1 = ASM[1];
+    wire bit2 = ASM[2];
+    wire bit3 = ASM[3];
+
+    wire RAM_first_word_byte = RAM[word_idx][7:0];
+    wire RAM_second_word_byte = RAM[word_idx][15:8];
+    wire RAM_third_word_byte = RAM[word_idx][23:16];
+    wire RAM_fourth_word_byte = RAM[word_idx][31:24];
 
     always_comb begin
-        case(ASM)
-            4'b0000: RD = raw_word; // LW
-            
-            4'b0001: begin // LB / LBU selection
-                case(byte_offset)
-                    2'b00: RD = {24'b0, raw_word[7:0]};
-                    2'b01: RD = {24'b0, raw_word[15:8]};
-                    2'b10: RD = {24'b0, raw_word[23:16]};
-                    2'b11: RD = {24'b0, raw_word[31:24]};
-                endcase
-            end
-            
-            4'b0010: begin // LH / LHU selection
-                case(byte_offset[1])
-                    1'b0: RD = {16'b0, raw_word[15:0]};
-                    1'b1: RD = {16'b0, raw_word[31:16]};
-                endcase
-            end
+        RD = 32'b0;
+        if (bit0) begin
+            RD[7:0] = RAM_first_word_byte;
+        end
+        if (bit1) begin
+            RD[15:8] = RAM_second_word_byte;
+        end
+        if (bit2) begin
+            RD[23:16] = RAM_third_word_byte;
+        end
+        if (bit3) begin
+            RD[31:24] = RAM_fourth_word_byte;
+        end
 
-            default: RD = raw_word;
-        endcase
     end
 
 endmodule
