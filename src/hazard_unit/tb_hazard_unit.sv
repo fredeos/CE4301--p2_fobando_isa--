@@ -105,18 +105,31 @@ module tb_hazard_unit;
         end
     endfunction
 
-    function automatic logic [31:0] enc_t(
-        input logic [3:0] func4,
+    function automatic logic [31:0] enc_t_send(
         input logic [2:0] sd,
         input logic [4:0] rn
     );
         begin
-            enc_t = '0;
-            enc_t[0]     = 1'b1;
-            enc_t[5:1]   = OP_T;
-            enc_t[9:6]   = func4;
-            enc_t[12:10] = sd;
-            enc_t[19:15] = rn;
+            enc_t_send = '0;
+            enc_t_send[0]     = 1'b1;
+            enc_t_send[5:1]   = OP_T;
+            enc_t_send[9:6]   = T_SEND;
+            enc_t_send[12:10] = sd;
+            enc_t_send[19:15] = rn;
+        end
+    endfunction
+
+    function automatic logic [31:0] enc_t_recv(
+        input logic [4:0] rd,
+        input logic [2:0] sm
+    );
+        begin
+            enc_t_recv = '0;
+            enc_t_recv[0]     = 1'b1;
+            enc_t_recv[5:1]   = OP_T;
+            enc_t_recv[9:6]   = T_RECV;
+            enc_t_recv[14:10] = rd;
+            enc_t_recv[18:16] = sm;
         end
     endfunction
 
@@ -343,7 +356,7 @@ module tb_hazard_unit;
 
         clear_inputs();
         EXInstr = enc_secure(OP_V_LD, '0, 3'd2, 3'd1, 3'd0, 3'd0);
-        IDInstr = enc_t(T_RECV, 3'd2, 5'd12);
+        IDInstr = enc_t_recv(5'd12, 3'd2);
         #1;
         check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
@@ -351,7 +364,7 @@ module tb_hazard_unit;
 
         clear_inputs();
         EXInstr = enc_secure(OP_V_LD, '0, 3'd2, 3'd1, 3'd0, 3'd0);
-        IDInstr = enc_t(T_SEND, 3'd2, 5'd12);
+        IDInstr = enc_t_send(3'd2, 5'd12);
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
@@ -399,7 +412,7 @@ module tb_hazard_unit;
 
         clear_inputs();
         EXInstr  = enc_normal(OP_R, ALU_ADD, 5'd8, 5'd12, 5'd0);
-        WBInstr  = enc_t(T_RECV, 3'd6, 5'd12);
+        WBInstr  = enc_t_recv(5'd12, 3'd6);
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_WB, SRC_PIPE, SRC_PIPE,
@@ -407,7 +420,7 @@ module tb_hazard_unit;
 
         clear_inputs();
         EXInstr  = enc_secure(OP_PR, ALU_ADD, 3'd5, 3'd6, 3'd1, 3'd2);
-        MEMInstr = enc_t(T_SEND, 3'd6, 5'd12);
+        MEMInstr = enc_t_send(3'd6, 5'd12);
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_ALU, SRC_PIPE, SRC_PIPE,

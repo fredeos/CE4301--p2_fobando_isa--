@@ -223,8 +223,7 @@ module hazard_unit #(
 
     function automatic logic [4:0] normal_dst_reg(
         input logic [4:0] opcode,
-        input logic [4:0] rd,
-        input logic [4:0] rn
+        input logic [4:0] rd
     );
         begin
             // Obtiene el registro normal destino de la instruccion.
@@ -233,7 +232,7 @@ module hazard_unit #(
                 OP_I,
                 OP_M_LD: normal_dst_reg = rd;
                 OP_JF:   normal_dst_reg = rd;
-                OP_T:    normal_dst_reg = rn;
+                OP_T:    normal_dst_reg = rd;
                 default: normal_dst_reg = REG_ZERO;
             endcase
         end
@@ -365,7 +364,7 @@ module hazard_unit #(
                         end
                         T_RECV: begin
                             id_ssrc1_valid = 1'b1;
-                            id_ssrc1 = id_sd;
+                            id_ssrc1 = id_sm;
                         end
                         default: begin
                         end
@@ -450,7 +449,7 @@ module hazard_unit #(
                         end
                         T_RECV: begin
                             ex_ssrc1_valid = 1'b1;
-                            ex_ssrc1 = ex_sd;
+                            ex_ssrc1 = ex_sm;
                         end
                         default: begin
                         end
@@ -468,8 +467,8 @@ module hazard_unit #(
     assign mem_writes_secure = writes_secure_reg(mem_valid, mem_opcode, mem_func4);
     assign wb_writes_secure  = writes_secure_reg(wb_valid, wb_opcode, wb_func4);
 
-    assign mem_normal_dst = normal_dst_reg(mem_opcode, mem_rd, mem_rn);
-    assign wb_normal_dst  = normal_dst_reg(wb_opcode, wb_rd, wb_rn);
+    assign mem_normal_dst = normal_dst_reg(mem_opcode, mem_rd);
+    assign wb_normal_dst  = normal_dst_reg(wb_opcode, wb_rd);
     assign mem_secure_dst = secure_dst_reg(mem_opcode, mem_sd);
     assign wb_secure_dst  = secure_dst_reg(wb_opcode, wb_sd);
 
