@@ -1,0 +1,190 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1539-g2693dd32b)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 12;
+:vpi_module "C:\iverilog\lib\ivl\system.vpi";
+:vpi_module "C:\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "C:\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "C:\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "C:\iverilog\lib\ivl\va_math.vpi";
+:vpi_module "C:\iverilog\lib\ivl\v2009.vpi";
+S_00000158e3c7ece0 .scope package, "$unit" "$unit" 2 1;
+ .timescale 0 0;
+S_00000158e3c680b0 .scope module, "sALU_tb" "sALU_tb" 3 3;
+ .timescale -9 -12;
+P_00000158e3c694a0 .param/l "WIDTH" 1 3 4, +C4<00000000000000000000000000100000>;
+v00000158e3c683d0_0 .var "A", 31 0;
+v00000158e3d69620_0 .var "B", 31 0;
+v00000158e3c65f30_0 .net "Y", 31 0, L_00000158e3c42d80;  1 drivers
+v00000158e3c65fd0_0 .var "op", 0 0;
+S_00000158e3c68240 .scope module, "DUT" "sALU" 3 9, 4 1 0, S_00000158e3c680b0;
+ .timescale 0 0;
+    .port_info 0 /INPUT 32 "A";
+    .port_info 1 /INPUT 32 "B";
+    .port_info 2 /INPUT 1 "op";
+    .port_info 3 /OUTPUT 32 "Y";
+P_00000158e3c68920 .param/l "WIDTH" 0 4 1, +C4<00000000000000000000000000100000>;
+L_00000158e3d69170 .functor OR 32, v00000158e3c683d0_0, v00000158e3d69620_0, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>;
+v00000158e3c436a0_0 .net "A", 31 0, v00000158e3c683d0_0;  1 drivers
+v00000158e3c43250_0 .net "B", 31 0, v00000158e3d69620_0;  1 drivers
+v00000158e3c7ee70_0 .net "Y", 31 0, L_00000158e3c42d80;  alias, 1 drivers
+v00000158e3c659c0_0 .net "add_res", 31 0, L_00000158e3c42ce0;  1 drivers
+v00000158e3d6b7d0_0 .net "op", 0 0, v00000158e3c65fd0_0;  1 drivers
+v00000158e3d6bdb0_0 .net "or_res", 31 0, L_00000158e3d69170;  1 drivers
+L_00000158e3c42ce0 .arith/sum 32, v00000158e3c683d0_0, v00000158e3d69620_0;
+L_00000158e3c42d80 .functor MUXZ 32, L_00000158e3c42ce0, L_00000158e3d69170, v00000158e3c65fd0_0, C4<>;
+    .scope S_00000158e3c680b0;
+T_0 ;
+    %vpi_call/w 3 12 "$dumpfile", "salu.vcd" {0 0 0};
+    %vpi_call/w 3 13 "$dumpvars", 32'sb00000000000000000000000000000000, S_00000158e3c680b0 {0 0 0};
+    %vpi_call/w 3 14 "$display", "--- ADD (op=0) ---" {0 0 0};
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v00000158e3c65fd0_0, 0, 1;
+    %pushi/vec4 10, 0, 32;
+    %store/vec4 v00000158e3c683d0_0, 0, 32;
+    %pushi/vec4 20, 0, 32;
+    %store/vec4 v00000158e3d69620_0, 0, 32;
+    %delay 1000, 0;
+    %load/vec4 v00000158e3c65f30_0;
+    %load/vec4 v00000158e3c65f30_0;
+    %cmpi/e 30, 0, 32;
+    %flag_mov 8, 6;
+    %jmp/0 T_0.0, 8;
+    %pushi/vec4 1531986259, 0, 32; draw_string_vec4
+    %pushi/vec4 21341, 0, 16; draw_string_vec4
+    %concat/vec4; draw_string_vec4
+    %jmp/1 T_0.1, 8;
+T_0.0 ; End of true expr.
+    %pushi/vec4 1531330889, 0, 32; draw_string_vec4
+    %pushi/vec4 19549, 0, 16; draw_string_vec4
+    %concat/vec4; draw_string_vec4
+    %jmp/0 T_0.1, 8;
+ ; End of false expr.
+    %blend;
+T_0.1;
+    %vpi_call/w 3 18 "$display", "10 + 20 = %0d %s", S<1,vec4,s32>, S<0,vec4,u48> {2 0 0};
+    %pushi/vec4 4294967291, 0, 32;
+    %store/vec4 v00000158e3c683d0_0, 0, 32;
+    %pushi/vec4 4294967293, 0, 32;
+    %store/vec4 v00000158e3d69620_0, 0, 32;
+    %delay 1000, 0;
+    %load/vec4 v00000158e3c65f30_0;
+    %load/vec4 v00000158e3c65f30_0;
+    %cmpi/e 4294967288, 0, 32;
+    %flag_mov 8, 6;
+    %jmp/0 T_0.2, 8;
+    %pushi/vec4 1531986259, 0, 32; draw_string_vec4
+    %pushi/vec4 21341, 0, 16; draw_string_vec4
+    %concat/vec4; draw_string_vec4
+    %jmp/1 T_0.3, 8;
+T_0.2 ; End of true expr.
+    %pushi/vec4 1531330889, 0, 32; draw_string_vec4
+    %pushi/vec4 19549, 0, 16; draw_string_vec4
+    %concat/vec4; draw_string_vec4
+    %jmp/0 T_0.3, 8;
+ ; End of false expr.
+    %blend;
+T_0.3;
+    %vpi_call/w 3 21 "$display", "-5 + -3 = %0d %s", S<1,vec4,s32>, S<0,vec4,u48> {2 0 0};
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v00000158e3c683d0_0, 0, 32;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v00000158e3d69620_0, 0, 32;
+    %delay 1000, 0;
+    %load/vec4 v00000158e3c65f30_0;
+    %load/vec4 v00000158e3c65f30_0;
+    %cmpi/e 0, 0, 32;
+    %flag_mov 8, 6;
+    %jmp/0 T_0.4, 8;
+    %pushi/vec4 1531986259, 0, 32; draw_string_vec4
+    %pushi/vec4 21341, 0, 16; draw_string_vec4
+    %concat/vec4; draw_string_vec4
+    %jmp/1 T_0.5, 8;
+T_0.4 ; End of true expr.
+    %pushi/vec4 1531330889, 0, 32; draw_string_vec4
+    %pushi/vec4 19549, 0, 16; draw_string_vec4
+    %concat/vec4; draw_string_vec4
+    %jmp/0 T_0.5, 8;
+ ; End of false expr.
+    %blend;
+T_0.5;
+    %vpi_call/w 3 24 "$display", " 0 +  0 = %0d %s", S<1,vec4,s32>, S<0,vec4,u48> {2 0 0};
+    %vpi_call/w 3 26 "$display", "--- OR  (op=1) ---" {0 0 0};
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v00000158e3c65fd0_0, 0, 1;
+    %pushi/vec4 4278190080, 0, 32;
+    %store/vec4 v00000158e3c683d0_0, 0, 32;
+    %pushi/vec4 16777215, 0, 32;
+    %store/vec4 v00000158e3d69620_0, 0, 32;
+    %delay 1000, 0;
+    %load/vec4 v00000158e3c65f30_0;
+    %cmpi/e 4294967295, 0, 32;
+    %flag_mov 8, 6;
+    %jmp/0 T_0.6, 8;
+    %pushi/vec4 1531986259, 0, 32; draw_string_vec4
+    %pushi/vec4 21341, 0, 16; draw_string_vec4
+    %concat/vec4; draw_string_vec4
+    %jmp/1 T_0.7, 8;
+T_0.6 ; End of true expr.
+    %pushi/vec4 1531330889, 0, 32; draw_string_vec4
+    %pushi/vec4 19549, 0, 16; draw_string_vec4
+    %concat/vec4; draw_string_vec4
+    %jmp/0 T_0.7, 8;
+ ; End of false expr.
+    %blend;
+T_0.7;
+    %vpi_call/w 3 30 "$display", "0xFF000000 | 0x00FFFFFF = %h %s", v00000158e3c65f30_0, S<0,vec4,u48> {1 0 0};
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v00000158e3c683d0_0, 0, 32;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v00000158e3d69620_0, 0, 32;
+    %delay 1000, 0;
+    %load/vec4 v00000158e3c65f30_0;
+    %cmpi/e 0, 0, 32;
+    %flag_mov 8, 6;
+    %jmp/0 T_0.8, 8;
+    %pushi/vec4 1531986259, 0, 32; draw_string_vec4
+    %pushi/vec4 21341, 0, 16; draw_string_vec4
+    %concat/vec4; draw_string_vec4
+    %jmp/1 T_0.9, 8;
+T_0.8 ; End of true expr.
+    %pushi/vec4 1531330889, 0, 32; draw_string_vec4
+    %pushi/vec4 19549, 0, 16; draw_string_vec4
+    %concat/vec4; draw_string_vec4
+    %jmp/0 T_0.9, 8;
+ ; End of false expr.
+    %blend;
+T_0.9;
+    %vpi_call/w 3 33 "$display", "0x00000000 | 0x00000000 = %h %s", v00000158e3c65f30_0, S<0,vec4,u48> {1 0 0};
+    %pushi/vec4 10485760, 0, 32;
+    %store/vec4 v00000158e3c683d0_0, 0, 32;
+    %pushi/vec4 184549536, 0, 32;
+    %store/vec4 v00000158e3d69620_0, 0, 32;
+    %delay 1000, 0;
+    %load/vec4 v00000158e3c65f30_0;
+    %cmpi/e 195035296, 0, 32;
+    %flag_mov 8, 6;
+    %jmp/0 T_0.10, 8;
+    %pushi/vec4 1531986259, 0, 32; draw_string_vec4
+    %pushi/vec4 21341, 0, 16; draw_string_vec4
+    %concat/vec4; draw_string_vec4
+    %jmp/1 T_0.11, 8;
+T_0.10 ; End of true expr.
+    %pushi/vec4 1531330889, 0, 32; draw_string_vec4
+    %pushi/vec4 19549, 0, 16; draw_string_vec4
+    %concat/vec4; draw_string_vec4
+    %jmp/0 T_0.11, 8;
+ ; End of false expr.
+    %blend;
+T_0.11;
+    %vpi_call/w 3 36 "$display", "0x00000000 | 0x00000000 = %h %s", v00000158e3c65f30_0, S<0,vec4,u48> {1 0 0};
+    %vpi_call/w 3 38 "$finish" {0 0 0};
+    %end;
+    .thread T_0;
+# The file index is used to find the file name in the following table.
+:file_names 5;
+    "N/A";
+    "<interactive>";
+    "-";
+    "sALU_tb.sv";
+    "sALU.sv";
