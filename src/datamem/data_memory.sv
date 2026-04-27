@@ -43,7 +43,7 @@ module data_memory #(
         for (int i = 0; i < NUM_WORDS-1; i++) begin
             RAM[i] = 32'h0;
         end
-        $readmemh("./src/memories/data_mem.hex", RAM);
+        $readmemh("./src/datamem/data_mem.hex", RAM);
     end
 
     // --- Synchronous Write (Store) ---

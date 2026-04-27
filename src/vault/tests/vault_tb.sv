@@ -22,7 +22,7 @@ module vault_tb;
     endtask
 
     initial begin
-        $dumpfile("vault_tb.vcd");   // nombre del archivo
+        $dumpfile("./output/wave.vcd");   // nombre del archivo
         $dumpvars(0, vault_tb);         // qué señales guardar
         CLK = 0; RST = 1; WE = 4'b0000;
         A = 0; WD = 0; ASM = 4'b0000;
@@ -84,7 +84,7 @@ module vault_tb;
         // --- 6. GUARDAR RESULTADOS ---
         $display("\n[SISTEMA] Guardando volcado de memoria final...");
         // Asegúrate de que la carpeta ./src/output/ exista físicamente
-        $writememh("./src/output/vault_mod.hex", DUT.RAM);
+        $writememh("./output/vault_exit.hex", DUT.RAM);
         
         $display("[SISTEMA] Archivo generado exitosamente.");
 

@@ -63,7 +63,7 @@ module data_memory_tb();
         // --- 6. GUARDAR RESULTADOS ---
         $display("\n[SISTEMA] Guardando volcado de memoria final...");
         // Asegúrate de que la carpeta ./src/output/ exista físicamente
-        $writememh("./src/output/bedrock_mod.hex", uut.RAM);
+        $writememh("./output/ram_exit.hex", uut.RAM);
         
         $display("[SISTEMA] Archivo generado exitosamente.");
 

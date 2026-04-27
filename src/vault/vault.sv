@@ -35,7 +35,7 @@ module vault #(
         for (int i = 0; i < NUM_WORDS; i++) begin
             RAM[i] = 32'h0;
         end
-        $readmemh("./src/memories/vault_mem.hex", RAM);
+        $readmemh("./src/vault/vault_mem.hex", RAM);
     end
 
     // --- Synchronous Write (Store) ---
