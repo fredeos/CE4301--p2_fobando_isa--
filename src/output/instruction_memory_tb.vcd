@@ -1,0 +1,81 @@
+$date
+	Sat Apr 25 19:31:46 2026
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module instruction_memory_tb $end
+$var wire 32 ! Instruction [31:0] $end
+$var parameter 32 " CLK_PERIOD $end
+$var parameter 32 # MEM_SIZE_KB $end
+$var reg 32 $ PC [31:0] $end
+$scope module uut $end
+$var wire 32 % A [31:0] $end
+$var wire 32 & RD [31:0] $end
+$var wire 14 ' word_idx [13:0] $end
+$var parameter 32 ( ADDR_WIDTH $end
+$var parameter 32 ) MEM_SIZE_KB $end
+$var parameter 32 * NUM_WORDS $end
+$scope begin $ivl_for_loop0 $end
+$var integer 32 + i [31:0] $end
+$upscope $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+b100000000000000 *
+b1000000 )
+b1110 (
+b1000000 #
+b1010 "
+$end
+#0
+$dumpvars
+b100000000000000 +
+b0 '
+b10011 &
+b0 %
+b0 $
+b10011 !
+$end
+#15000
+b10100000000001010010011 !
+b10100000000001010010011 &
+b1 '
+b100 $
+b100 %
+#25000
+b101000000000001100010011 !
+b101000000000001100010011 &
+b10 '
+b1000 $
+b1000 %
+#35000
+b11000101000001110110011 !
+b11000101000001110110011 &
+b11 '
+b1100 $
+b1100 %
+#45000
+b11101000010000000100011 !
+b11101000010000000100011 &
+b100 '
+b10000 $
+b10000 %
+#55000
+b11101111 !
+b11101111 &
+b1000 '
+b100000 $
+b100000 %
+#60000
+b10011 !
+b10011 &
+b10100 '
+b1010000 $
+b1010000 %
+#65000

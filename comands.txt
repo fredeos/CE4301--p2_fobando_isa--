@@ -1,0 +1,9 @@
+iverilog -g2012 -o xx.vvp xx.sv
+
+vvp xx.vvp
+
+#TB
+
+iverilog -g2012 -o xx.vvp xxTB.v xx.v
+vvp top.vvp
+gtkwave ./output/wave.vcd
