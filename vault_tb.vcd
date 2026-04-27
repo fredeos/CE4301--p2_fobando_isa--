@@ -1,0 +1,178 @@
+$date
+	Sat Apr 25 15:15:30 2026
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module vault_tb $end
+$var wire 32 ! RD [31:0] $end
+$var reg 32 " A [31:0] $end
+$var reg 4 # ASM [3:0] $end
+$var reg 1 $ CLK $end
+$var reg 1 % RST $end
+$var reg 32 & WD [31:0] $end
+$var reg 4 ' WE [3:0] $end
+$scope module DUT $end
+$var wire 32 ( A [31:0] $end
+$var wire 4 ) ASM [3:0] $end
+$var wire 1 $ CLK $end
+$var wire 1 % RST $end
+$var wire 32 * WD [31:0] $end
+$var wire 4 + WE [3:0] $end
+$var wire 32 , raw_word [31:0] $end
+$var wire 4 - word_idx [3:0] $end
+$var wire 2 . byte_offset [1:0] $end
+$var parameter 32 / ADDR_WIDTH $end
+$var parameter 32 0 NUM_WORDS $end
+$var reg 32 1 RD [31:0] $end
+$scope begin $ivl_for_loop0 $end
+$var integer 32 2 i [31:0] $end
+$upscope $end
+$upscope $end
+$scope task check $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+b10000 0
+b100 /
+$end
+#0
+$dumpvars
+b10000 2
+b10101010101110111100110011011101 1
+b0 .
+b0 -
+b10101010101110111100110011011101 ,
+b0 +
+b0 *
+b0 )
+b0 (
+b0 '
+b0 &
+1%
+0$
+b0 #
+b0 "
+b10101010101110111100110011011101 !
+$end
+#5000
+1$
+#6000
+0%
+#7000
+b1010 !
+b1010 1
+b1010 ,
+b1 -
+b100 "
+b100 (
+#8000
+b11001010111111101011101010111110 !
+b11001010111111101011101010111110 1
+b11001010111111101011101010111110 ,
+b10 -
+b1000 "
+b1000 (
+#9000
+b1101 !
+b1101 1
+b1101 ,
+b1111 -
+b111100 "
+b111100 (
+#10000
+b11011101 !
+b11011101 1
+b10101010101110111100110011011101 ,
+b0 -
+b0 "
+b0 (
+b1 #
+b1 )
+0$
+#11000
+b11001100 !
+b11001100 1
+b1 .
+b1 "
+b1 (
+#12000
+b10111011 !
+b10111011 1
+b10 .
+b10 "
+b10 (
+#13000
+b10101010 !
+b10101010 1
+b11 .
+b11 "
+b11 (
+#14000
+b0 .
+b1100110011011101 !
+b1100110011011101 1
+b0 "
+b0 (
+b10 #
+b10 )
+#15000
+b1010101010111011 !
+b1010101010111011 1
+b10 .
+b10 "
+b10 (
+1$
+#16000
+b11 ,
+b101 -
+b0 .
+b11 !
+b11 1
+b1111 '
+b1111 +
+b10010001101000101011001111000 &
+b10010001101000101011001111000 *
+b10100 "
+b10100 (
+b0 #
+b0 )
+#20000
+0$
+#25000
+b10010001101000101011001111000 !
+b10010001101000101011001111000 1
+b10010001101000101011001111000 ,
+1$
+#26000
+b0 '
+b0 +
+#27000
+b100 !
+b100 1
+b100 ,
+b110 -
+b1 '
+b1 +
+b10101010101110111100110011011101 &
+b10101010101110111100110011011101 *
+b11000 "
+b11000 (
+#30000
+0$
+#35000
+b11011101 !
+b11011101 1
+b11011101 ,
+1$
+#36000
+b1 #
+b1 )
+b0 '
+b0 +
+#37000
