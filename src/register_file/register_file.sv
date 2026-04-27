@@ -22,8 +22,14 @@ module register_file #(
     logic [DATA_WIDTH-1:0] regfile_mem [0:DEPTH-1]; // Banco de registros
     integer i;                                      // Índice de reset
 
+    localparam logic [ADDR_WIDTH-1:0] ZERO_REG  = 5'd0;
+    localparam logic [ADDR_WIDTH-1:0] PC_REG    = 5'd3;
+    localparam logic [ADDR_WIDTH-1:0] LR_REG    = 5'd4;
+    localparam logic [ADDR_WIDTH-1:0] DELTA_REG = 5'd30;
+    localparam logic [ADDR_WIDTH-1:0] MAX_REG   = 5'd31;
+
     localparam logic [DATA_WIDTH-1:0] DELTA_CONST   = 32'h9E3779B9; // Constante TEA
-    localparam logic [DATA_WIDTH-1:0] GABRIEL_CONST = 32'hFFFFFFFF; // Constante fija
+    localparam logic [DATA_WIDTH-1:0] MAX_CONST     = 32'hFFFFFFFF; // Constante fija
 
     always_ff @(posedge clk) begin
         if (reset) begin
@@ -34,10 +40,11 @@ module register_file #(
         end
         else if (we) begin
             // Bloquea escritura en registros especiales
-            if ((wa != 5'd0) &&
-                (wa != 5'd3) &&
-                (wa != 5'd30) &&
-                (wa != 5'd31)) begin
+            if ((wa != ZERO_REG) &&
+                (wa != PC_REG) &&
+                (wa != LR_REG) &&
+                (wa != DELTA_REG) &&
+                (wa != MAX_REG)) begin
                 regfile_mem[wa] <= wd;
             end
         end
@@ -46,19 +53,21 @@ module register_file #(
     always_comb begin
         // Lectura del primer operando
         unique case (ra1)
-            5'd0:  rd1 = 32'h00000000;  // gabo
-            5'd3:  rd1 = pc_in;         // pc
-            5'd30: rd1 = DELTA_CONST;   // delta
-            5'd31: rd1 = GABRIEL_CONST; // gabriel
+            ZERO_REG:  rd1 = '0;          // zero
+            PC_REG:    rd1 = pc_in;       // pc
+            LR_REG:    rd1 = regfile_mem[LR_REG]; // lr
+            DELTA_REG: rd1 = DELTA_CONST; // delta
+            MAX_REG:   rd1 = MAX_CONST;   // max
             default: rd1 = regfile_mem[ra1];
         endcase
 
         // Lectura del segundo operando
         unique case (ra2)
-            5'd0:  rd2 = 32'h00000000;  // gabo
-            5'd3:  rd2 = pc_in;         // pc
-            5'd30: rd2 = DELTA_CONST;   // delta
-            5'd31: rd2 = GABRIEL_CONST; // gabriel
+            ZERO_REG:  rd2 = '0;          // zero
+            PC_REG:    rd2 = pc_in;       // pc
+            LR_REG:    rd2 = regfile_mem[LR_REG]; // lr
+            DELTA_REG: rd2 = DELTA_CONST; // delta
+            MAX_REG:   rd2 = MAX_CONST;   // max
             default: rd2 = regfile_mem[ra2];
         endcase
     end

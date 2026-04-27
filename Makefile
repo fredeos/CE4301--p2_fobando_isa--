@@ -8,7 +8,7 @@ run:
 
 build_regfile:
 	mkdir -p ./output
-	iverilog -g2012 -o ./output/regfile.out ./src/register_file.sv ./src/tb_register_file.sv
+	iverilog -g2012 -o ./output/regfile.out ./src/register_file/register_file.sv ./src/register_file/tb_register_file.sv
 
 run_regfile:
 	vvp ./output/regfile.out

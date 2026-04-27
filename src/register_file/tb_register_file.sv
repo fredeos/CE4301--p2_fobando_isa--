@@ -64,15 +64,19 @@ module tb_register_file;
         ra1 = 5'd0;
         ra2 = 5'd30;
         #1;
-        check_equal(rd1, 32'h00000000, "gabo constante");
+        check_equal(rd1, 32'h00000000, "zero constante");
         check_equal(rd2, 32'h9E3779B9, "delta constante");
 
         ra1 = 5'd31;
         ra2 = 5'd3;
         #1;
-        check_equal(rd1, 32'hFFFFFFFF, "gabriel constante");
+        check_equal(rd1, 32'hFFFFFFFF, "max constante");
         check_equal(rd2, 32'h00000004, "pc desde pc_in");
         check_equal(pc_out, 32'h00000004, "pc_out refleja pc_in");
+
+        ra1 = 5'd4;
+        #1;
+        check_equal(rd1, 32'h00000000, "lr reset");
 
         // Escritura válida en registro general
         @(negedge clk);
@@ -112,7 +116,7 @@ module tb_register_file;
         #1;
         check_equal(rd1, 32'h12345678, "we=0 no write");
 
-        // Bloquea escritura en gabo
+        // Bloquea escritura en zero
         @(negedge clk);
         wa = 5'd0;
         wd = 32'h11111111;
@@ -123,7 +127,7 @@ module tb_register_file;
         we  = 1'b0;
         ra1 = 5'd0;
         #1;
-        check_equal(rd1, 32'h00000000, "write bloqueado en gabo");
+        check_equal(rd1, 32'h00000000, "write bloqueado en zero");
 
         // Bloquea escritura en pc
         @(negedge clk);
@@ -138,6 +142,19 @@ module tb_register_file;
         #1;
         check_equal(rd1, 32'h00000004, "write bloqueado en pc");
 
+        // Bloquea escritura en lr
+        @(negedge clk);
+        wa = 5'd4;
+        wd = 32'h55555555;
+        we = 1'b1;
+
+        @(posedge clk);
+        #1;
+        we  = 1'b0;
+        ra1 = 5'd4;
+        #1;
+        check_equal(rd1, 32'h00000000, "write bloqueado en lr");
+
         // Bloquea escritura en delta
         @(negedge clk);
         wa = 5'd30;
@@ -151,7 +168,7 @@ module tb_register_file;
         #1;
         check_equal(rd1, 32'h9E3779B9, "write bloqueado en delta");
 
-        // Bloquea escritura en gabriel
+        // Bloquea escritura en max
         @(negedge clk);
         wa = 5'd31;
         wd = 32'h44444444;
@@ -162,7 +179,7 @@ module tb_register_file;
         we  = 1'b0;
         ra1 = 5'd31;
         #1;
-        check_equal(rd1, 32'hFFFFFFFF, "write bloqueado en gabriel");
+        check_equal(rd1, 32'hFFFFFFFF, "write bloqueado en max");
 
         // Cambia pc_in dinámicamente
         pc_in = 32'h00000024;
