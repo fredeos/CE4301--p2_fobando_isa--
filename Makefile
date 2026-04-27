@@ -15,4 +15,4 @@ run_top:
 	gtkwave ./output/wave.vcd
 
 clean:
-	rm -f ./output/*.out ./output/*.vcd
+	rm -f ./output/*
