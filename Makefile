@@ -9,7 +9,7 @@ ssu = ${dirCONTROL}/ssu.sv				# unidad de seleccion segura (instrucciones @)
 # --- Makefile ---
 
 build:
-	iverilog -g2012 -o ./src/output/sim.out ./src/data_memory.sv ./src/data_memory_tb.sv
+	iverilog -g2012 -o ./src/output/sim.out ./src/instruction_memory/instruction_memory.sv ./src/instruction_memory/instruction_memory_tb.sv
 
 ControlUnit:
 	iverilog -g2012 -o ./output/sim.out ${control_unit} ${dirCONTROLtb}/tb_control_unit.sv
@@ -24,7 +24,7 @@ SSU:
 	iverilog -g2012 -o ./output/sim.out ${ssu} ${dirCONTROLtb}/tb_ssu.sv
 run:
 	vvp ./src/output/sim.out
-	gtkwave ./src/output/data_memory_tb.vcd
+	gtkwave ./src/output/instruction_memory_tb.vcd
 
 clean:
 	rm ./output/*.out ./output/*.vcd
