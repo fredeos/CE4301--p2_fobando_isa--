@@ -27,6 +27,10 @@ dirALUtb = ${dirALU}/tests
 dirHAZARD = ./src/hazard
 dirHAZARDtb = ${dirHAZARD}/tests
 
+# --- Directorio del datapath y extension de inmediatos ---
+dirDATAPATH = ./src/datapath
+dirDATAPATHtb = ${dirDATAPATH}/tests
+
 #////////////////////////////////////////////////////////////////////////////////
 # --- Archivos de codigo fuente para ejecutar pruebas ---
 
@@ -88,6 +92,10 @@ pALU:
 sALU:
 	mkdir -p ./output
 	iverilog -g2012 -o ./output/sim.out ${dirALU}/sALU.sv ${dirALUtb}/sALU_tb.sv
+
+ImmExt:
+	mkdir -p ./output
+	iverilog -g2012 -o ./output/sim.out ${dirDATAPATH}/imm_ext32.sv ${dirDATAPATHtb}/tb_imm_ext.sv
 
 run:
 	vvp ./output/sim.out

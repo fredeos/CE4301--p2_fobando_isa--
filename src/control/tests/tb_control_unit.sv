@@ -39,9 +39,9 @@ module tb_control_unit ();
         instructions[1] = 32'h01181480; // add p0, r2, r3
         instructions[2] = 32'h00708d03; // @muli pc, ra, 7
         instructions[3] = 32'hff59f110; // bge r5, r7, -4
-        instructions[4] = 32'h003138c8; // ldb r0,- 3(sp) ldw rd, +- -4(rn)
+        instructions[4] = 32'h003138c8; // ldb r0,- 3(sp)
         instructions[5] = 32'h00414e0a; // stw r5,+ 4(sp)
-        instructions[6] = 32'h00000512; // jal ra, 11
+        instructions[6] = 32'h000006d2; // jal ra, 11
         instructions[7] = 32'hbeef0022; // login 0xBEEF0
         instructions[8] = 32'h00000062; // quit
         instructions[9] = 32'h00022144; // pdiv  ax, bx, cx
@@ -57,7 +57,7 @@ module tb_control_unit ();
         for (int i = 0; i < N; i++) begin
             instr = instructions[i];
             #10;
-            $display("-----------------------[INSTR[%d]:0x%h]-----------------------", i, instr);
+            $display("-----------------------[INSTR[%0d]:0x%h]-----------------------", i, instr);
             $display("MemToReg(WB mux) = %b", MemToReg);
             $display("RegFile WE = %b", RegWrite[1]);
             $display("SecMem WE = %b", RegWrite[0]);
