@@ -16,6 +16,9 @@ ControlUnit:
 CondUnit:
 	iverilog -g2012 -o ./output/sim.out ${cond_unit} ${dirCONTROLtb}/tb_cond_unit.sv
 
+AdminUnit:
+	iverilog -g2012 -o ./output/sim.out ${admin_unit} ${dirCONTROLtb}/tb_admin_unit.sv
+
 SSU:
 	iverilog -g2012 -o ./output/sim.out ${ssu} ${dirCONTROLtb}/tb_ssu.sv
 run:

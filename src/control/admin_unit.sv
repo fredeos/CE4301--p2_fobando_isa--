@@ -6,14 +6,15 @@ module admin_unit #(parameter width = 32)(
 );
 
 logic val, expired, timeout, valid, sesff_en, sesff_clr, logout_clr;
-logic [width-1:0] attempts;
+logic [width-1:0] attempts, inc;
 
 assign val = (logout) ? 1'b1 : signal;
+assign inc = {{width-1{1'b0}} , ~val};
 
 // --- Flip-flop para cantidad de intentos ---
 always_ff @(posedge clk, posedge rst) begin
     if (rst || timeout) attempts <= 0;
-    else if (login) attemps <= attemps + ~val;
+    else if (login) attempts <= attempts + inc;
 end
 
 assign valid = (attempts < max);
