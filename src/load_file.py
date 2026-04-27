@@ -3,10 +3,10 @@ import os
 
 def get_output_path(filename):
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    target_dir = os.path.normpath(os.path.join(current_dir, "..", "memories"))
-    if not os.path.exists(target_dir):
-        os.makedirs(target_dir)
-    return os.path.join(target_dir, filename)
+    # target_dir = os.path.normpath(os.path.join(current_dir, "..", "memories"))
+    # if not os.path.exists(target_dir):
+    #     os.makedirs(target_dir)
+    return os.path.join(current_dir, filename)
 
 def main():
     parser = argparse.ArgumentParser(description='Carga archivos a memoria Verilog')
@@ -55,5 +55,5 @@ if __name__ == "__main__":
     main()
 
 """
-python load_file.py --input ../files/bedrock.png --output ../memories/data_mem.hex --address 0x0
+python load_file.py --input ../input/bedrock.png --output ./datamem/data_mem.hex --address 0x0
 """
