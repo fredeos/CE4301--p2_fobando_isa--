@@ -1,82 +1,108 @@
-`timescale 1ns/1ps
+`timescale 1ns / 1ps
 
 module data_memory_tb();
 
-    parameter MEM_SIZE_KB = 64;
-    parameter CLK_PERIOD = 10;
+    // Parámetros
+    localparam int MEM_SIZE_KB = 1; 
+    
+    // Señales del DUT
+    logic        CLK;
+    logic        RST;
+    logic [31:0] A;
+    logic        WE;
+    logic [3:0]  ASM;
+    logic [31:0] WD;
+    logic [31:0] RD;
 
-    logic        CLK, RST;
-    logic [31:0] A, WD, RD;
-    logic [3:0]  WE, ASM;
-
-    data_memory #(.MEM_SIZE_KB(MEM_SIZE_KB)) uut (
+    // Instancia del módulo (DUT)
+    data_memory #(
+        .MEM_SIZE_KB(MEM_SIZE_KB)
+    ) dut (
         .CLK(CLK), .RST(RST), .A(A), .WE(WE), .ASM(ASM), .WD(WD), .RD(RD)
     );
 
-    always #(CLK_PERIOD/2) CLK = ~CLK;
+    // Reloj a 100MHz
+    always #5 CLK = (CLK === 1'b0);
 
     initial begin
-        // --- 1. Inicialización ---
-        CLK = 0; RST = 1; A = 0; WE = 0; ASM = 0; WD = 0;
-        #(CLK_PERIOD*5); RST = 0; #(CLK_PERIOD*2);
-
-        $display("\n=== LABORATORIO DE MEMORIA: TEST DE ALINEACION ===");
+        $dumpfile("./output/wave.vcd");
+        $dumpvars(0, data_memory_tb);
+        // --- 1. Reset y Estabilización ---
+        CLK = 0;
+        RST = 1;
+        A = 0; WE = 0; ASM = 0; WD = 0;
+        #20 RST = 0;
         
-        // --- 2. PRUEBA DE CARGA DE PALABRA (LW) ---
-        // Asumiendo que cargaste 04030201 en la dirección 0x0
-        A = 32'h00000000; ASM = 4'b0000; 
-        #(CLK_PERIOD);
-        $display("[LW]  Dir 0x00: %h (Esperado: 04030201)", RD);
+        $display("Iniciando Testbench Corregido...");
 
-        // --- 3. PRUEBA DE BYTES (LB) EN CADENA ---
-        $display("\n--- Test de desplazamiento de Bytes (LB) ---");
-        for (int i = 0; i < 4; i++) begin
-            A = 32'h00000000 + i;
-            ASM = 4'b0001; // Modo Byte
-            #(CLK_PERIOD);
-            $display("[LB]  Dir 0x%0h: %h (Esperado: %02h)", A, RD, i+1);
-        end
-
-        // --- 4. PRUEBA DE MEDIAS PALABRAS (LH) ---
-        $display("\n--- Test de Medias Palabras (LH) ---");
-        // Parte baja (Bytes 0 y 1)
-        A = 32'h00000000; ASM = 4'b0010; 
-        #(CLK_PERIOD);
-        $display("[LH]  Dir 0x00: %h (Esperado: 00000201)", RD);
+        // --- 2. TEST 1: Escritura Completa (Word) ---
+        // Escribimos en 0x04. Word_idx debería ser 1.
+        task_write(32'h00000004, 32'hDEADBEEF, 4'b1111);
         
-        // Parte alta (Bytes 2 y 3)
-        A = 32'h00000002; ASM = 4'b0010; 
-        #(CLK_PERIOD);
-        $display("[LH]  Dir 0x02: %h (Esperado: 00000403)", RD);
+        // --- 3. TEST 2: Escritura Parcial (Half-word) ---
+        // Escribimos en 0x08. Word_idx debería ser 2.
+        // Usamos la tarea de Byte Replicado para probar seguridad
+        task_write(32'h00000008, 16'hABCD, 4'b0011);
 
-        // --- 5. TEST DE "VANDALISMO" CONTROLADO ---
-        $display("\n--- Escribiendo 0xFF en el Byte 2 de 0x00 ---");
-        // Queremos que 04030201 pase a ser 04FF0201
-        EscribirUnByte(32'h00000002, 8'hFF, 4'b0100); 
+        // --- 4. TEST 3: Escritura Parcial (byte) ---
+        // Escribimos en 0x08. Word_idx debería ser 2.
+        // Usamos la tarea de Byte Replicado para probar seguridad
+        task_write(32'h0000000a, 16'h77, 4'b0001);
+
+        // --- 5. Verificación de Lectura ---
+        #10;
+        task_read(32'h00000004, 4'b1111);
+        $display("[READ] Address 0x04: %h (Expected: DEADBEEF)", RD);
         
-        A = 32'h00000000; ASM = 4'b0000; // Volver a leer palabra completa
-        #(CLK_PERIOD);
-        $display("[LW]  Resultado Final: %h (Esperado: 04ff0201)", RD);
+        task_read(32'h00000008, 4'b1111);
+        $display("[READ] Address 0x08: %h (Expected: 0077ABCD)", RD);
 
-        #(CLK_PERIOD*5);
-
-        // --- 6. GUARDAR RESULTADOS ---
-        $display("\n[SISTEMA] Guardando volcado de memoria final...");
-        // Asegúrate de que la carpeta ./src/output/ exista físicamente
-        $writememh("./output/ram_exit.hex", uut.RAM);
-        
+        // --- 6. Volcado Final ---
+        #20;
+        $display("\n[SISTEMA] Generando archivo de salida corregido...");
+        $writememh("./output/data_mem_exit.hex", dut.RAM);
         $display("[SISTEMA] Archivo generado exitosamente.");
-
         $finish;
     end
 
-    // Tarea de escritura reutilizada
-    task EscribirUnByte(input [31:0] addr, input [7:0] data, input [3:0] byte_en);
+    // --- Tareas Corregidas con Delays de Estabilización ---
+
+    task task_write(input [31:0] addr, input [31:0] data, input [3:0] mask);
         begin
-            @(posedge CLK); #2;
-            A = addr; WE = byte_en; WD = {data, data, data, data};
-            @(posedge CLK); #2;
+            @(posedge CLK);
+            #1; // Delay crucial: cambiamos señales justo después del flanco
+            A = addr;
+            WD = data;
+            WE = 1;
+            ASM = mask;
+            @(posedge CLK);
+            #1; // Esperamos a que el dato se capture
             WE = 0;
+            ASM = 4'b0000;
+        end
+    endtask
+
+    task EscribirMediaPalabra(input [31:0] addr, input [15:0] data, input [3:0] mask);
+        begin
+            @(posedge CLK);
+            #1;
+            A = addr;
+            WE = 1;
+            ASM = mask;
+            WD = {16'h0, data}; // Colocamos la media palabra en la base
+            @(posedge CLK);
+            #1;
+            WE = 0;
+            ASM = 4'b0000;
+        end
+    endtask
+
+    task task_read(input [31:0] addr, input [3:0] mask);
+        begin
+            #1; // Fuera de flanco
+            A = addr;
+            ASM = mask;
+            #2; // Tiempo para always_comb
         end
     endtask
 

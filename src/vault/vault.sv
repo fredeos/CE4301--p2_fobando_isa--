@@ -3,11 +3,11 @@ module vault #(
   )(input  logic        CLK,
     input  logic        RST,
     input  logic [31:0] A,    // 32-bit Address from ALUOut
-    input  logic [3:0]  WE,   // Write Enable (Byte-strobe)
+    input  logic WE,          // Write Enable
     input  logic [3:0]  ASM,  // Addressing Selection Mode
     // Data signals
     input  logic [31:0] WD,   // Write Data from RD2
-    output logic [31:0] RD);    // Read Data (MemOut)
+    output logic [31:0] RD ); // Read Data (MemOut)
 
 
     // Calculo de los bits de direccionamiento para indexar el array
@@ -23,58 +23,110 @@ module vault #(
     // --- Address Mapping ---
     // Extract the word index using the calculated width
     // We still ignore A[1:0] for word alignment
-    logic [ADDR_WIDTH-1:0] word_idx;
-    assign word_idx = A[ADDR_WIDTH+1:2];
+    logic [ADDR_WIDTH-1:0] word_idx [0:1];
+    assign word_idx[0] = A[ADDR_WIDTH+1:2]; // nearest word
+    assign word_idx[1] = word_idx[0] + 1;   // next word
 
-    // Byte selection within the word
+    // Byte offset (useful defining word boundaries)
     logic [1:0] byte_offset;
     assign byte_offset = A[1:0];
 
+    // Byte selection
+    wire byte1 = ASM[0];
+    wire byte2 = ASM[1];
+    wire byte3 = ASM[2];
+    wire byte4 = ASM[3];
+
     // --- Initialization ---
     initial begin
-        for (int i = 0; i < NUM_WORDS; i++) begin
+        for (int i = 0; i < NUM_WORDS-1; i++) begin
             RAM[i] = 32'h0;
         end
         $readmemh("./src/vault/vault_mem.hex", RAM);
     end
 
     // --- Synchronous Write (Store) ---
-    always_ff @(posedge CLK) begin
+    always_ff @(posedge CLK, posedge RST) begin
         if (RST) begin
-            // Reset logic
-        end else begin
-            if (WE[0]) RAM[word_idx][7:0]   <= WD[7:0];
-            if (WE[1]) RAM[word_idx][15:8]  <= WD[15:8];
-            if (WE[2]) RAM[word_idx][23:16] <= WD[23:16];
-            if (WE[3]) RAM[word_idx][31:24] <= WD[31:24];
+            // reset logic
+        end else if (WE) begin
+            case (byte_offset)
+                2'b00: begin // within boundaries
+                    if (byte1) RAM[word_idx[0]][7:0]   <= WD[7:0];
+                    if (byte2) RAM[word_idx[0]][15:8]  <= WD[15:8];
+                    if (byte3) RAM[word_idx[0]][23:16] <= WD[23:16];
+                    if (byte4) RAM[word_idx[0]][31:24] <= WD[31:24]; 
+                end
+
+                2'b01: begin // boundaries exceed by 1 byte
+                    if (byte1) RAM[word_idx[0]][15:8]   <= WD[7:0];
+                    if (byte2) RAM[word_idx[0]][23:16]  <= WD[15:8];
+                    if (byte3) RAM[word_idx[0]][31:24]  <= WD[23:16];
+                    if (byte4) RAM[word_idx[1]][7:0]    <= WD[31:24];
+                end
+
+                2'b10: begin // boundaries exceed by 2 bytes
+                    if (byte1) RAM[word_idx[0]][23:16]  <= WD[7:0];
+                    if (byte2) RAM[word_idx[0]][31:24]  <= WD[15:8];
+                    if (byte3) RAM[word_idx[1]][7:0]    <= WD[23:16];
+                    if (byte4) RAM[word_idx[1]][15:8]   <= WD[31:24]; 
+                end
+
+                2'b11: begin // boundaries exceed by 3 byte
+                    if (byte1) RAM[word_idx[0]][31:24] <= WD[7:0];
+                    if (byte2) RAM[word_idx[1]][7:0]   <= WD[15:8];
+                    if (byte3) RAM[word_idx[1]][15:8]  <= WD[23:16];
+                    if (byte4) RAM[word_idx[1]][23:16] <= WD[31:24]; 
+                end
+            endcase
         end
     end
 
     // --- Asynchronous Read (Load) ---
-    logic [31:0] raw_word;
-    assign raw_word = RAM[word_idx];
+    logic [7:0] rdbytes [7:0];
+    assign rdbytes[0] = RAM[word_idx[0]][7:0];
+    assign rdbytes[1] = RAM[word_idx[0]][15:8];
+    assign rdbytes[2] = RAM[word_idx[0]][23:16];
+    assign rdbytes[3] = RAM[word_idx[0]][31:24];
+    assign rdbytes[4] = RAM[word_idx[1]][7:0];
+    assign rdbytes[5] = RAM[word_idx[1]][15:8];
+    assign rdbytes[6] = RAM[word_idx[1]][23:16];
+    assign rdbytes[7] = RAM[word_idx[1]][31:24];
 
     always_comb begin
-        case(ASM)
-            4'b0000: RD = raw_word; // LW
-            
-            4'b0001: begin // LB / LBU selection
-                case(byte_offset)
-                    2'b00: RD = {24'b0, raw_word[7:0]};
-                    2'b01: RD = {24'b0, raw_word[15:8]};
-                    2'b10: RD = {24'b0, raw_word[23:16]};
-                    2'b11: RD = {24'b0, raw_word[31:24]};
-                endcase
-            end
-            
-            4'b0010: begin // LH / LHU selection
-                case(byte_offset[1])
-                    1'b0: RD = {16'b0, raw_word[15:0]};
-                    1'b1: RD = {16'b0, raw_word[31:16]};
-                endcase
+        RD = 32'b0;
+        case (byte_offset)
+            2'b00: begin // within boundaries
+                if (byte1) RD[7:0]   = rdbytes[0];
+                if (byte2) RD[15:8]  = rdbytes[1];
+                if (byte3) RD[23:16] = rdbytes[2];
+                if (byte4) RD[31:24] = rdbytes[3];
             end
 
-            default: RD = raw_word;
+            2'b01: begin // boundaries exceed by 1 byte
+                if (byte1) RD[7:0]   = rdbytes[1];
+                if (byte2) RD[15:8]  = rdbytes[2];
+                if (byte3) RD[23:16] = rdbytes[3];
+                if (byte4) RD[31:24] = rdbytes[4];
+            end
+
+            2'b10: begin // boundaries exceed by 2 bytes
+                if (byte1) RD[7:0]   = rdbytes[2];
+                if (byte2) RD[15:8]  = rdbytes[3];
+                if (byte3) RD[23:16] = rdbytes[4];
+                if (byte4) RD[31:24] = rdbytes[5];
+            end
+
+            2'b11: begin // boundaries exceed by 3 byte
+                if (byte1) RD[7:0]   = rdbytes[3];
+                if (byte2) RD[15:8]  = rdbytes[4];
+                if (byte3) RD[23:16] = rdbytes[5];
+                if (byte4) RD[31:24] = rdbytes[6];
+            end
+
+            default: begin
+                RD = 32'b0;
+            end
         endcase
     end
 

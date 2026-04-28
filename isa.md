@@ -21,16 +21,16 @@
 
 |addr|nombre|descripcion|
 |----|------|-----------|
-|0   | <code>zero</code> | 0x0 (<i>read-only</i>) |
+|0   | <code>zero</code> | 0x0 (*read-only*) |
 |1   | <code>ra</code>   | return address |
 |2   | <code>sp</code>   | stack pointer |
 |3   | <code>pc</code>   | program counter |
-|4   | <code>lr</code>   | login register (<i>read-only</i>) |
+|4   | <code>lr</code>   | login register (*read-only*) |
 |5   | <code>p0</code>   | argumento y retorno de funcion|
 |6   | <code>p1</code>-<code>p8</code>   | argumentos de funcion |
 |14  | <code>r0</code>-<code>r15</code>| proposito general |
-|30  | <code>delta</code> | 0x9e3779b9 (<i>read-only</i>) |
-|31  | <code>max</code>   | 0xFFFFFFFF (<i>read-only</i>) |
+|30  | <code>delta</code> | 0x9e3779b9 (*read-only*) |
+|31  | <code>max</code>   | 0xFFFFFFFF (*read-only*) |
 
 ### Banco seguro de registros
 
@@ -39,7 +39,7 @@
 
 |addr|nombre|descripcion|
 |----|------|-----------|
-|0   |  <code>ax</code> | proposito general |
+|0   |  <code>ax</code> | 0x0 (*read-only*) |
 |1   |  <code>bx</code> | proposito general |
 |2   |  <code>cx</code> | proposito general |
 |3   |  <code>dx</code> | proposito general |
