@@ -2,8 +2,8 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     input logic clk, rst
 );
     localparam MEM_SIZE_KB = 64;
-    // --- Señales para interconexiones de módulos y pipes ---
-    // + Valores default
+    // ########################################################################################################
+    // --- Valores default del procesador ---
     logic [31:0] nop, password, lifetime, timeout, max;
 
     assign nop = 32'h00000080; // Valor por defecto para omitir instrucciones
@@ -12,75 +12,100 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     assign timeout = 32'd10000; // tiempo de espera al acceder limit de intenos
     assign max = 32'd4; // limite de intentos para iniciar session segura
     
-    // + Señales del pipeline
-    logic [31:0] PC, PCplus4, PC_new, PCnext;
+    // --- Señales de interconexion entre modulos y etapas ---
+    // [PC select]
+    // + Señales de etapa
+    logic [31:0] PC, PC_new;
+    // + Señales de control
 
+    // [Instruction Fetch (IF)]
+    // + Señales de etapa
     logic [31:0] INSTR, IF_INSTR;
+    logic [31:0] IF_PC, IF_PCplus4;
+    // + Señales de control
+    logic Login, Ignore;
+    // + Señales de riesgos
+    logic IF_EN, IF_CLR;
 
+    // [Instruction Decode (ID)]
+    // + Señales de etapa
     logic [31:0] ID_INSTR, ID_Imm32, ID_PCplus4;
     logic [31:0] ID_Op1, ID_Op2, ID_RegRD1, ID_RegRD2, ID_SecRD1, ID_SecRD2, ID_SecRD3;
     logic [4:0]  ID_OPCODE, ID_Rd, ID_Rn, ID_Rm, Rm;
     logic [3:0]  ID_FUNC4;
     logic [2:0]  ID_Sd, ID_Sn, ID_Sm, ID_Sf, Sm;
+    // + Señales de control
+    logic [1:0] ID_MemToReg, ID_RegWrite, ID_MemWrite, ID_Session, ID_ALUSrcA, ID_RSel;
+    logic [7:0] ID_MemBytes;
+    logic [4:0] ID_Branch, ID_ALUControl;
+    logic [2:0] ID_ImmSel;
+    logic ID_ALUSel, ID_ALUSrcB, ID_RegSrc, ID_SecSrc;
+    // + Señales de riesgos
+    logic ID_EN, ID_CLR;
 
-    logic [31:0] EX_INSTR, pALU_Out, sALU_Out, pSrcA, pSrcB, sSrcB, ALU_Out;
-    logic [31:0] EX_Op1, EX_Op2, EX_Op3, EX_Imm32, ImmSLL, EX_PCBranch, EX_PCplus4;
+    // [Execute (EX)]
+    // + Señales de etapa
+    logic [31:0] EX_INSTR, EX_pALUOut, EX_sALUOut, EX_ALUOut;
+    logic [31:0] EX_Op1, EX_Op2, EX_Op3, EX_Imm32, EX_PCBranch, EX_PCplus4;
+    logic [31:0] EX_Op1t, EX_Op2t, EX_Op3t;
+    logic [31:0] pSrcA, pSrcB, shiftL_imm;
     logic [3:0]  EX_ALUFlags;
     logic [4:0]  EX_RWB;
+    // + Señales de control
+    logic [1:0] EX_MemToReg, EX_RegWrite, EX_MemWrite, EX_Session, EX_ALUSrcA;
+    logic [7:0] EX_MemBytes;
+    logic [4:0] EX_Branch, EX_ALUControl;
+    logic EX_ALUSel, EX_ALUSrcB;
+    // + Señales del hazard unit
+    logic [1:0]  EX_Op1Sel, EX_Op2Sel, EX_Op3Sel;
+    logic [31:0] EX_Op1Fwd, EX_Op2Fwd, EX_Op3Fwd;
+    // + Señales de riesgos
+    logic EX_CLR;
 
+    // [Memory access (MEM)]
+    // + Señales de etapa
     logic [31:0] MEM_INSTR, MEM_ALUOut, MEM_VaultOut, MEM_MemOut;
     logic [31:0] MEM_PCplus4, MEM_PCBranch, MEM_Op2;
     logic [3:0]  MEM_ALUFlags;
     logic [4:0]  MEM_RWB;
     logic [1:0]  MEM_PCSrc;
-
-    logic [31:0] WB_INSTR, WB_ALUOut, WB_VaultOut, WB_MemOut, WB_PCplus4;
-    logic [31:0] WB_DataOut, WB_WriteData;
-    logic [4:0]  WB_RWB;
-    logic WB_PCSrc;
-
     // + Señales de control
-    logic Login, Ignore;
-
-    logic [1:0] ID_MemToReg, ID_RegWrite, ID_MemWrite, ID_Session, ID_ALUSrcA, ID_RSel;
-    logic [7:0] ID_MemBytes;
-    logic [4:0] ID_Branch, ID_ALUControl;
-    logic [2:0] ID_ImmSel;
-    logic ID_JalSel, ID_ALUOut, ID_ALUSrcB, ID_RegSrc, ID_SecSrc;
-
-    logic [1:0] EX_MemToReg, EX_RegWrite, EX_MemWrite, EX_Session, EX_ALUSrcA;
-    logic [7:0] EX_MemBytes;
-    logic [4:0] EX_Branch, EX_ALUControl;
-    logic EX_JalSel, EX_ALUOut, EX_ALUSrcB;
-
     logic [1:0] MEM_MemToReg, MEM_RegWrite, MEM_MemWrite, MEM_Session;
     logic [7:0] MEM_MemBytes;
     logic [4:0] MEM_Branch;
-    logic MEM_JalSel;
+    // + Señales de riesgos
+    logic MEM_EN;
 
+    // [Writeback (WB)]
+    // + Señales de etapa
+    logic [31:0] WB_INSTR, WB_ALUOut, WB_VaultOut, WB_MemOut, WB_PCplus4;
+    logic [31:0] WB_DataOut;
+    logic [4:0]  WB_RWB;
+    logic WB_PCSrc;
+    // + Señales de control
     logic [1:0] WB_MemToReg, WB_RegWrite;
-    logic WB_JalSel;
+    // + Señales de riesgos
+    logic WB_EN;
 
-    // + Señales de hazard unit
-
+    // ########################################################################################################
     // --- 0. Selección del PC  ---
-    assign PCnext = (WB_PCSrc) ? PC_new : ( (MEM_PCSrc[0]) ? MEM_PCBranch : PCplus4);
+    assign PC = (WB_PCSrc) ? PC_new : ( (MEM_PCSrc[0]) ? MEM_PCBranch : IF_PCplus4);
 
     // --- 1. Instruction Fetch (IF) ---
-    // >> Flip-Flop para pipe IF
+    // + Flip-Flop para pipe IF
     always_ff @(posedge clk, posedge rst) begin
-        if (rst) PC <= 32'b0;
-        else PC <= PCnext;
+        if (rst | IF_CLR) IF_PC <= '0;
+        else if (~IF_EN) IF_PC <= PC;
     end
 
-    assign PCplus4 = PC + 32'd4;
-    // >> Memoria de instrucciones
+    assign IF_PCplus4 = IF_PC + 32'd4;
+    // + Memoria de instrucciones
     instruction_memory #(.MEM_SIZE_KB(64)) _rom (
-        .A(PC),
+        .A(IF_PC),
         .RD(INSTR)
     );
 
-    // >> Secure Selection Unit (SSU)
+    // + Secure Selection Unit (SSU)
     ssu _ssu (
         .login(Login), .P(INSTR[0]),
         .opcode(INSTR[5:1]),
@@ -90,14 +115,14 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     assign IF_INSTR = (Ignore) nop : INSTR;
 
     // --- 2. Instruction Decode (ID) ---
-    // >> Flip-Flop para pipe ID
+    // + Flip-Flop para pipe ID
     always_ff @(posedge clk, posedge rst) begin
-        if (rst) begin 
-            ID_INSTR <= '0;
+        if (rst | ID_CLR) begin 
+            ID_INSTR <= nop;
             ID_PCplus4 <= '0;
-        end else begin 
+        end else if (~ID_EN) begin 
             ID_INSTR <= IF_INSTR;
-            ID_PCplus4 <= PCplus4;
+            ID_PCplus4 <= IF_PCplus4;
         end
     end
 
@@ -112,7 +137,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     assign ID_Sn = ID_INSTR[15:13];
     assign ID_Sm = ID_INSTR[18:16];
     assign ID_Sf = ID_INSTR[21:19];
-    // >> Unidad de control 
+    // + Unidad de control 
     control_unit _control_unit (
         .opcode(ID_OPCODE),
         .func4(ID_FUNC4),
@@ -120,9 +145,9 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
         .MemToReg(ID_MemToReg),
         .RegWrite(ID_RegWrite),
         .MemWrite(ID_MemWrite), .MemBytes(ID_MemBytes),
-        .JalSel(ID_JalSel), .Branch(ID_Branch),
+        .Branch(ID_Branch),
         .Session(ID_Session),
-        .ALUOut(ID_ALUOut), .ALUControl(ID_ALUControl), .ALUSrcB(ID_ALUSrcB), .ALUSrcA(ID_ALUSrcA), 
+        .ALUSel(ID_ALUSel), .ALUControl(ID_ALUControl), .ALUSrcB(ID_ALUSrcB), .ALUSrcA(ID_ALUSrcA), 
         .RSel(ID_RSel),
         .ImmSel(ID_ImmSel),
         .RegSrc(ID_RegSrc),
@@ -131,23 +156,23 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
 
     assign Rm = (ID_RegSrc) ? ID_Rd : ID_Rm;
     assign Sm = (ID_SecSrc) ? ID_Sd : ID_Sm;
-    // >> Banco seguro de registros (Secure memory)
+    // + Banco seguro de registros (Secure memory)
     secure_memory #(.DATA_WIDTH(32), .ADDR_WIDTH(3)) _secure_memory (
         .clk(clk), .rst_n(~rst),
         .we(WB_RegWrite[0]),
         .ra1(ID_Sn), .ra2(Sm), .ra3(ID_Sf),
         .wa(WB_RWB[2:0]),
-        .wd(WB_WriteData),
+        .wd(WB_DataOut),
         .rd1(ID_SecRD1), .rd2(ID_SecRD2), .rd3(ID_SecRD3)
     );
 
-    // >> Banco de registros (Register File)
+    // + Banco de registros (Register File)
     register_file #(.DATA_WIDTH(32), .ADDR_WIDTH(5)) _register_file (
         .clk(clk), .reset(rst),
         .we(WB_RegWrite[1]),
         .ra1(ID_Rn), .ra2(Rm),
         .wa(WB_RWB),
-        .wd(WB_WriteData),
+        .wd(WB_DataOut),
         .pc_in(ID_PCplus4), .lr_in({ 31'b0, Login}),
         .rd1(ID_RegRD1), .rd2(ID_RegRD2),
         .pc_out(PC_new)
@@ -163,10 +188,10 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     );
 
     // --- 3. Execute (EX) ---
-    // >> Flip-Flop para pipe EX
+    // + Flip-Flop para pipe EX
     always_ff @(posedge clk, posedge rst) begin
-        if (rst) begin 
-            EX_INSTR <= '0;
+        if (rst | EX_CLR) begin 
+            EX_INSTR <= nop;
             EX_PCplus4 <= '0;
             EX_Op1 <= '0;
             EX_Op2 <= '0;
@@ -174,13 +199,12 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
             EX_Imm32 <= '0;
             EX_RWB <= '0;
 
-            EX_ALUControl <= '0;
+            EX_ALUControl <= 5'b00010;
             EX_ALUSrcA <= '0;
             EX_ALUSrcB <= '0;
-            EX_ALUOut <=  '0;
+            EX_ALUSel <=  '0;
             EX_Session <= '0;
             EX_Branch <= '0;
-            EX_JalSel <= '0;
             EX_MemWrite <= '0;
             EX_MemBytes <= '0;
             EX_RegWrite <= '0;
@@ -197,10 +221,9 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
             EX_ALUControl <= ID_ALUControl;
             EX_ALUSrcA <= ID_ALUSrcA;
             EX_ALUSrcB <= ID_ALUSrcB;
-            EX_ALUOut <= ID_ALUOut;
+            EX_ALUSel <= ID_ALUSel;
             EX_Session <= ID_Session;
             EX_Branch <= ID_Branch;
-            EX_JalSel <= ID_JalSel;
             EX_MemWrite <= ID_MemWrite;
             EX_MemBytes <= ID_MemBytes;
             EX_RegWrite <= ID_RegWrite;
@@ -208,53 +231,64 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
         end
     end
 
-    // >> ALU primaria
+    // + ALU primaria
+    // >> Adelantamientos
+    assign EX_Op1t = (EX_Op1Sel != 2'b00) ? EX_Op1Fwd : EX_Op1;
+    assign EX_Op2t = (EX_Op2Sel != 2'b00) ? EX_Op2Fwd : EX_Op2;
+    assign EX_Op3t = (EX_Op3Sel != 2'b00) ? EX_Op3Fwd : EX_Op3;
+
+    // >> Seleccion de entradas para ALU principal
+    assign pSrcA = (EX_ALUSrcA[1]) ? ( (EX_ALUSrcA[0]) ? 32'b0 : EX_Op1t) : ( (EX_ALUSrcA[0]) ? 32'b0 : password);
+    assign pSrcB = (EX_ALUSrcB) ? EX_Imm32 : EX_Op2t;
     pALU #(.WIDTH(32)) _pALU (
         .A(pSrcA), .B(pSrcB),
         .op(EX_ALUControl[3:0]),
-        .Y(pALU_Out),
+        .Y(EX_pALUOut),
         .flags(EX_ALUFlags)
     );
 
-    // >> ALU secundaria
+    // + ALU secundaria
     sALU #(.WIDTH(32)) _sALU (
-        .A(pALU_Out), .B(sSrcB),
+        .A(EX_pALUOut), .B(EX_Op3t),
         .op(EX_ALUControl[4]),
-        .Y(sALU_Out)
+        .Y(EX_sALUOut)
     );
 
-    assign ALU_Out = (EX_ALUOut) ? pALU_Out : sALU_Out;
-    // >> Calculo de saltos
-    assign ImmSLL = EX_Imm32 << 2;
-    assign EX_PCBranch = EX_PCplus4 + ImmSLL;
+    assign EX_ALUOut = (EX_ALUSel) ? EX_pALUOut : EX_sALUOut;
+    
+    // + Calculo de saltos
+    assign shiftL_imm = EX_Imm32 << 2;
+    assign EX_PCBranch = EX_PCplus4 + shiftL_imm;
 
     // --- 4. Memory access (MEM) ---
-    // >> Flip-Flop para pipe MEM
+    // + Flip-Flop para pipe MEM
     always_ff @(posedge clk, posedge rst) begin
         if (rst) begin 
+            MEM_INSTR <= nop;
             MEM_RWB <= '0;
             MEM_ALUFlags <= '0;
             MEM_ALUOut <= '0;
             MEM_PCplus4 <= '0;
             MEM_PCBranch <= '0;
+            MEM_Op2 <= '0;
         
             MEM_Session <= '0;
             MEM_Branch <= '0;
-            MEM_JalSel <= '0;
             MEM_MemWrite <= '0;
             MEM_MemBytes <= '0;
             MEM_RegWrite <= '0;
             MEM_MemToReg <= '0;
-        end else begin 
+        end else if (~MEM_EN) begin
+            MEM_INSTR <= EX_INSTR;
             MEM_RWB <= EX_RWB;
             MEM_ALUFlags <= EX_ALUFlags;
-            MEM_ALUOut <= ALU_Out;
+            MEM_ALUOut <= EX_ALUOut;
             MEM_PCplus4 <= EX_PCplus4;
             MEM_PCBranch <= EX_PCBranch;
+            MEM_Op2 <= EX_Op2t;
 
             MEM_Session <= EX_Session;
             MEM_Branch <= EX_Branch;
-            MEM_JalSel <= EX_JalSel;
             MEM_MemWrite <= EX_MemWrite;
             MEM_MemBytes <= EX_MemBytes;
             MEM_RegWrite <= EX_RegWrite;
@@ -262,7 +296,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
         end
     end
 
-    // >> Unidad de administrador
+    // + Unidad de administrador
     admin_unit #(.width(32)) _admin_unit (
         .clk(clk), .rst(rst),
         .logout(MEM_Session[1]), .signal(MEM_ALUFlags[3]), .login(MEM_Session[0]),
@@ -270,15 +304,14 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
         .session(Login)
     );
 
-    // >> Unidad de condicionales
+    // + Unidad de condicionales
     cond_unit _cond_unit (
         .Branch(MEM_Branch),
         .flags(MEM_ALUFlags),
         .PCSrc(MEM_PCSrc)
     );
 
-
-    // >> Boveda (Vault)
+    // + Boveda (Vault)
     vault #(.NUM_WORDS(16)) _vault (
         .CLK(clk), .RST(rst),
         .A(MEM_ALUOut),
@@ -288,7 +321,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
         .RD(MEM_VaultOut)
     );
 
-    // >> Memoria de datos
+    // + Memoria de datos
     data_memory #(.MEM_SIZE_KB(MEM_SIZE_KB)) _ram (
         .CLK(clk), .RST(rst),
         .A(MEM_ALUOut),
@@ -299,9 +332,10 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     );
 
     // --- 5. Writeback (WB) ---
-    // Flip-Flop para pipe WB
+    // + Flip-Flop para pipe WB
     always_ff @(posedge clk, posedge rst) begin
-        if (rst) begin 
+        if (rst) begin
+            WB_INSTR <= nop;
             WB_ALUOut <= '0;
             WB_MemOut <= '0;
             WB_VaultOut <= '0;
@@ -311,8 +345,8 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
             WB_PCSrc <= '0;
             WB_MemToReg <= '0;
             WB_RegWrite <= '0;
-            WB_JalSel <= '0;
-        end else begin 
+        end else if (~WB_EN) begin 
+            WB_INSTR <= MEM_INSTR;
             WB_ALUOut <= MEM_ALUOut;
             WB_MemOut <= MEM_MemOut;
             WB_VaultOut <= MEM_VaultOut;
@@ -322,30 +356,29 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
             WB_PCSrc <= MEM_PCSrc[1];
             WB_MemToReg <= MEM_MemToReg;
             WB_RegWrite <= MEM_RegWrite;
-            WB_JalSel <= MEM_JalSel;
         end
     end
 
-    // Seleccionar señales de salida
-    assign WB_DataOut = (WB_MemToReg[1]) ? ( (WB_MemToReg[0]) 32'b0 : WB_MemOut) : ( (WB_MemToReg[0]) ? WB_ALUOut : WB_ALUOut);
-    assign WB_WriteData = (WB_JalSel) WB_PCplus4 : WB_DataOut;
+    // + Seleccionar señales de salida
+    assign WB_DataOut = (WB_MemToReg[1]) ? ( (WB_MemToReg[0]) WB_PCplus4 : WB_MemOut) : ( (WB_MemToReg[0]) ? WB_ALUOut : WB_ALUOut);
 
     // --- 6. Unidad de Riesgos (Hazard Unit) ---
     hazard_unit #(.INSTR_WIDTH(32)) _hazard_unit (
         .IDInstr(ID_INSTR),
         .EXInstr(EX_INSTR),
-        .MEMInstr(),
-        .WBInstr(),
-        .branch_taken(),
-        .mem_busy(),
-        .wb_busy(),
-        .StallIF(), .FlushIF(),
-        .StallID(), .FlushID(),
-        .FlushEX(),
-        .StallMEM(),
-        .StallWB(),
-        .RD1SrcEX(),
-        .RD2SrcEX(),
-        .RD3SrcEX()
+        .MEMInstr(MEM_INSTR),
+        .WBInstr(WB_INSTR),
+        .RD1PipeEX(EX_Op1), .RD2PipeEX(EX_Op2), .RD3PipeEX(EX_Op3),
+        .ALUOut(MEM_ALUOut), .DataOutWB(WB_DataOut),
+        .branch_taken(MEM_PCSrc[0]),
+        .mem_busy(1'b0),
+        .wb_busy(1'b0),
+        .StallIF(IF_EN), .FlushIF(IF_CLR),
+        .StallID(ID_EN), .FlushID(ID_CLR),
+        .FlushEX(EX_CLR),
+        .StallMEM(MEM_EN),
+        .StallWB(WB_EN),
+        .RD1SrcEX(EX_Op1Sel), .RD2SrcEX(EX_Op2Sel), .RD3SrcEX(EX_Op3Sel),
+        .RD1FwdEX(EX_Op1Fwd), .RD2FwdEX(EX_Op2Fwd), .RD3FwdEX(EX_Op3Fwd)
     );
 endmodule
