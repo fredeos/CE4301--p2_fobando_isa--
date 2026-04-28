@@ -28,6 +28,11 @@ module tb_hazard_unit;
     logic [INSTR_WIDTH-1:0] EXInstr;
     logic [INSTR_WIDTH-1:0] MEMInstr;
     logic [INSTR_WIDTH-1:0] WBInstr;
+    logic [INSTR_WIDTH-1:0] RD1PipeEX;
+    logic [INSTR_WIDTH-1:0] RD2PipeEX;
+    logic [INSTR_WIDTH-1:0] RD3PipeEX;
+    logic [INSTR_WIDTH-1:0] ALUOut;
+    logic [INSTR_WIDTH-1:0] DataOutWB;
 
     logic branch_taken;
     logic mem_busy;
@@ -44,6 +49,9 @@ module tb_hazard_unit;
     logic [1:0] RD1SrcEX;
     logic [1:0] RD2SrcEX;
     logic [1:0] RD3SrcEX;
+    logic [INSTR_WIDTH-1:0] RD1FwdEX;
+    logic [INSTR_WIDTH-1:0] RD2FwdEX;
+    logic [INSTR_WIDTH-1:0] RD3FwdEX;
 
     int pass_count;
 
@@ -52,6 +60,11 @@ module tb_hazard_unit;
         .EXInstr(EXInstr),
         .MEMInstr(MEMInstr),
         .WBInstr(WBInstr),
+        .RD1PipeEX(RD1PipeEX),
+        .RD2PipeEX(RD2PipeEX),
+        .RD3PipeEX(RD3PipeEX),
+        .ALUOut(ALUOut),
+        .DataOutWB(DataOutWB),
         .branch_taken(branch_taken),
         .mem_busy(mem_busy),
         .wb_busy(wb_busy),
@@ -64,7 +77,10 @@ module tb_hazard_unit;
         .StallWB(StallWB),
         .RD1SrcEX(RD1SrcEX),
         .RD2SrcEX(RD2SrcEX),
-        .RD3SrcEX(RD3SrcEX)
+        .RD3SrcEX(RD3SrcEX),
+        .RD1FwdEX(RD1FwdEX),
+        .RD2FwdEX(RD2FwdEX),
+        .RD3FwdEX(RD3FwdEX)
     );
 
     function automatic logic [31:0] enc_normal(
@@ -139,6 +155,11 @@ module tb_hazard_unit;
             EXInstr = '0;
             MEMInstr = '0;
             WBInstr = '0;
+            RD1PipeEX = 32'h1111_1111;
+            RD2PipeEX = 32'h2222_2222;
+            RD3PipeEX = 32'h3333_3333;
+            ALUOut = 32'hAAAA_AAAA;
+            DataOutWB = 32'hBBBB_BBBB;
             branch_taken = 1'b0;
             mem_busy = 1'b0;
             wb_busy = 1'b0;
@@ -157,6 +178,9 @@ module tb_hazard_unit;
         input logic [1:0] exp_rd1,
         input logic [1:0] exp_rd2,
         input logic [1:0] exp_rd3,
+        input logic [INSTR_WIDTH-1:0] exp_rd1_val,
+        input logic [INSTR_WIDTH-1:0] exp_rd2_val,
+        input logic [INSTR_WIDTH-1:0] exp_rd3_val,
         input string test_name
     );
         begin
@@ -169,13 +193,16 @@ module tb_hazard_unit;
                 (StallWB !== exp_stall_wb) ||
                 (RD1SrcEX !== exp_rd1) ||
                 (RD2SrcEX !== exp_rd2) ||
-                (RD3SrcEX !== exp_rd3)) begin
+                (RD3SrcEX !== exp_rd3) ||
+                (RD1FwdEX !== exp_rd1_val) ||
+                (RD2FwdEX !== exp_rd2_val) ||
+                (RD3FwdEX !== exp_rd3_val)) begin
 
                 $display("[FAIL] %s", test_name);
-                $display("  Got      StallIF=%0b FlushIF=%0b StallID=%0b FlushID=%0b FlushEX=%0b StallMEM=%0b StallWB=%0b RD1=%02b RD2=%02b RD3=%02b",
-                         StallIF, FlushIF, StallID, FlushID, FlushEX, StallMEM, StallWB, RD1SrcEX, RD2SrcEX, RD3SrcEX);
-                $display("  Expected StallIF=%0b FlushIF=%0b StallID=%0b FlushID=%0b FlushEX=%0b StallMEM=%0b StallWB=%0b RD1=%02b RD2=%02b RD3=%02b",
-                         exp_stall_if, exp_flush_if, exp_stall_id, exp_flush_id, exp_flush_ex, exp_stall_mem, exp_stall_wb, exp_rd1, exp_rd2, exp_rd3);
+                $display("  Got      StallIF=%0b FlushIF=%0b StallID=%0b FlushID=%0b FlushEX=%0b StallMEM=%0b StallWB=%0b RD1=%02b RD2=%02b RD3=%02b V1=%08h V2=%08h V3=%08h",
+                         StallIF, FlushIF, StallID, FlushID, FlushEX, StallMEM, StallWB, RD1SrcEX, RD2SrcEX, RD3SrcEX, RD1FwdEX, RD2FwdEX, RD3FwdEX);
+                $display("  Expected StallIF=%0b FlushIF=%0b StallID=%0b FlushID=%0b FlushEX=%0b StallMEM=%0b StallWB=%0b RD1=%02b RD2=%02b RD3=%02b V1=%08h V2=%08h V3=%08h",
+                         exp_stall_if, exp_flush_if, exp_stall_id, exp_flush_id, exp_flush_ex, exp_stall_mem, exp_stall_wb, exp_rd1, exp_rd2, exp_rd3, exp_rd1_val, exp_rd2_val, exp_rd3_val);
                 $fatal(1);
             end else begin
                 pass_count++;
@@ -194,6 +221,7 @@ module tb_hazard_unit;
         clear_inputs();
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "sin_hazard");
 
         clear_inputs();
@@ -203,6 +231,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_ALU, SRC_WB, SRC_PIPE,
+                      32'hAAAA_AAAA, 32'hBBBB_BBBB, 32'h3333_3333,
                       "forward_normal_mem_rd1_y_wb_rd2");
 
         clear_inputs();
@@ -211,6 +240,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_ALU, SRC_PIPE,
+                      32'h1111_1111, 32'hAAAA_AAAA, 32'h3333_3333,
                       "forward_normal_mem_rd2");
 
         clear_inputs();
@@ -220,6 +250,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_ALU, SRC_PIPE, SRC_PIPE,
+                      32'hAAAA_AAAA, 32'h2222_2222, 32'h3333_3333,
                       "prioridad_forward_mem_sobre_wb");
 
         clear_inputs();
@@ -229,6 +260,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "store_no_genera_forward");
 
         clear_inputs();
@@ -237,6 +269,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "zero_no_genera_forward");
 
         clear_inputs();
@@ -246,6 +279,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_ALU, SRC_WB, SRC_PIPE,
+                      32'hAAAA_AAAA, 32'hBBBB_BBBB, 32'h3333_3333,
                       "forward_seguro_mem_rd1_y_wb_rd2");
 
         clear_inputs();
@@ -254,6 +288,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_ALU,
+                      32'h1111_1111, 32'h2222_2222, 32'hAAAA_AAAA,
                       "forward_seguro_mem_rd3");
 
         clear_inputs();
@@ -262,6 +297,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_WB,
+                      32'h1111_1111, 32'h2222_2222, 32'hBBBB_BBBB,
                       "forward_seguro_wb_rd3");
 
         clear_inputs();
@@ -271,6 +307,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_ALU, SRC_PIPE, SRC_PIPE,
+                      32'hAAAA_AAAA, 32'h2222_2222, 32'h3333_3333,
                       "prioridad_forward_seguro_mem_sobre_wb");
 
         clear_inputs();
@@ -280,6 +317,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "vault_store_no_genera_forward");
 
         clear_inputs();
@@ -288,6 +326,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "load_use_normal_por_rn");
 
         clear_inputs();
@@ -296,6 +335,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "load_use_normal_por_rm");
 
         clear_inputs();
@@ -304,6 +344,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "load_use_normal_store_data");
 
         clear_inputs();
@@ -312,6 +353,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "load_use_normal_tipo_i");
 
         clear_inputs();
@@ -320,6 +362,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "sin_load_use_si_no_lee_destino");
 
         clear_inputs();
@@ -328,6 +371,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "load_use_ignora_registro_zero");
 
         clear_inputs();
@@ -336,6 +380,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "ldv_use_seguro_por_sn");
 
         clear_inputs();
@@ -344,6 +389,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "ldv_use_seguro_por_sm");
 
         clear_inputs();
@@ -352,6 +398,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "ldv_use_seguro_por_sf");
 
         clear_inputs();
@@ -360,6 +407,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "ldv_use_recv");
 
         clear_inputs();
@@ -368,6 +416,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "send_no_lee_sd");
 
         clear_inputs();
@@ -377,6 +426,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "branch_tiene_prioridad_sobre_load_use");
 
         clear_inputs();
@@ -385,6 +435,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "mem_busy_tiene_prioridad_sobre_flush");
 
         clear_inputs();
@@ -392,6 +443,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b1,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "wb_busy_stall");
 
         clear_inputs();
@@ -400,6 +452,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b1,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "wb_busy_tiene_prioridad_sobre_branch");
 
         clear_inputs();
@@ -408,6 +461,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_WB, SRC_PIPE, SRC_PIPE,
+                      32'hBBBB_BBBB, 32'h2222_2222, 32'h3333_3333,
                       "jal_forward_a_ra");
 
         clear_inputs();
@@ -416,6 +470,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_WB, SRC_PIPE, SRC_PIPE,
+                      32'hBBBB_BBBB, 32'h2222_2222, 32'h3333_3333,
                       "recv_forward_a_registro_normal");
 
         clear_inputs();
@@ -424,6 +479,7 @@ module tb_hazard_unit;
         #1;
         check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_ALU, SRC_PIPE, SRC_PIPE,
+                      32'hAAAA_AAAA, 32'h2222_2222, 32'h3333_3333,
                       "send_forward_a_registro_seguro");
 
         $display("Todas las pruebas de hazard_unit pasaron: %0d casos", pass_count);

@@ -6,6 +6,12 @@ module hazard_unit #(
     input  logic [INSTR_WIDTH-1:0] MEMInstr,
     input  logic [INSTR_WIDTH-1:0] WBInstr,
 
+    input  logic [INSTR_WIDTH-1:0] RD1PipeEX,
+    input  logic [INSTR_WIDTH-1:0] RD2PipeEX,
+    input  logic [INSTR_WIDTH-1:0] RD3PipeEX,
+    input  logic [INSTR_WIDTH-1:0] ALUOut,
+    input  logic [INSTR_WIDTH-1:0] DataOutWB,
+
     input  logic branch_taken,
     input  logic mem_busy,
     input  logic wb_busy,
@@ -23,7 +29,11 @@ module hazard_unit #(
 
     output logic [1:0] RD1SrcEX,
     output logic [1:0] RD2SrcEX,
-    output logic [1:0] RD3SrcEX
+    output logic [1:0] RD3SrcEX,
+
+    output logic [INSTR_WIDTH-1:0] RD1FwdEX,
+    output logic [INSTR_WIDTH-1:0] RD2FwdEX,
+    output logic [INSTR_WIDTH-1:0] RD3FwdEX
 );
 
     // Codigos para seleccionar la fuente de forwarding hacia EX.
@@ -548,6 +558,26 @@ module hazard_unit #(
                 RD3SrcEX = SRC_WB;
             end
         end
+
+        // Los selectores anteriores controlan desde que bus se rescata el dato.
+        // SRC_ALU toma ALUOut desde MEM; SRC_WB toma DataOutWB desde WB.
+        case (RD1SrcEX)
+            SRC_ALU:  RD1FwdEX = ALUOut;
+            SRC_WB:   RD1FwdEX = DataOutWB;
+            default:  RD1FwdEX = RD1PipeEX;
+        endcase
+
+        case (RD2SrcEX)
+            SRC_ALU:  RD2FwdEX = ALUOut;
+            SRC_WB:   RD2FwdEX = DataOutWB;
+            default:  RD2FwdEX = RD2PipeEX;
+        endcase
+
+        case (RD3SrcEX)
+            SRC_ALU:  RD3FwdEX = ALUOut;
+            SRC_WB:   RD3FwdEX = DataOutWB;
+            default:  RD3FwdEX = RD3PipeEX;
+        endcase
 
         // Prioridad de control: stalls estructurales, branch, load-use.
         if (mem_busy) begin
