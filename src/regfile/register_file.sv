@@ -32,18 +32,15 @@ module register_file #(
     localparam logic [DATA_WIDTH-1:0] DELTA_CONST   = 32'h9E3779B9; // Constante TEA
     localparam logic [DATA_WIDTH-1:0] MAX_CONST     = 32'hFFFFFFFF; // Constante fija
 
+    assign pc_out = (we && (wa == PC_REG)) ? wd : pc_in;
     always_ff @(posedge clk) begin
         if (reset) begin
             // Limpia todos los registros internos
             for (i = 0; i < DEPTH; i = i + 1) begin
                 regfile_mem[i] <= '0;
             end
-            pc_out <= '0;
         end
         else if (we) begin
-            if (wa == PC_REG) begin
-                pc_out <= wd;
-            end
             // Bloquea escritura en registros especiales
             if ((wa != ZERO_REG) &&
                 (wa != PC_REG) &&
