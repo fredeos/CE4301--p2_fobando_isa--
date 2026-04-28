@@ -13,6 +13,7 @@ module register_file #(
 
     input  logic [DATA_WIDTH-1:0] wd,    // Dato de escritura
     input  logic [DATA_WIDTH-1:0] pc_in, // Valor actual del PC
+    input  logic [DATA_WIDTH-1:0] lr_in, // Valor actual del LR
 
     output logic [DATA_WIDTH-1:0] rd1,   // Dato leído 1
     output logic [DATA_WIDTH-1:0] rd2,   // Dato leído 2
@@ -37,8 +38,12 @@ module register_file #(
             for (i = 0; i < DEPTH; i = i + 1) begin
                 regfile_mem[i] <= '0;
             end
+            pc_out <= '0;
         end
         else if (we) begin
+            if (wa == PC_REG) begin
+                pc_out <= wd;
+            end
             // Bloquea escritura en registros especiales
             if ((wa != ZERO_REG) &&
                 (wa != PC_REG) &&
@@ -54,8 +59,8 @@ module register_file #(
         // Lectura del primer operando
         unique case (ra1)
             ZERO_REG:  rd1 = '0;          // zero
-            PC_REG:    rd1 = pc_in;       // pc
-            LR_REG:    rd1 = regfile_mem[LR_REG]; // lr
+            PC_REG:    rd1 = pc_out;      // pc
+            LR_REG:    rd1 = lr_in;       // lr
             DELTA_REG: rd1 = DELTA_CONST; // delta
             MAX_REG:   rd1 = MAX_CONST;   // max
             default: rd1 = regfile_mem[ra1];
@@ -64,14 +69,12 @@ module register_file #(
         // Lectura del segundo operando
         unique case (ra2)
             ZERO_REG:  rd2 = '0;          // zero
-            PC_REG:    rd2 = pc_in;       // pc
-            LR_REG:    rd2 = regfile_mem[LR_REG]; // lr
+            PC_REG:    rd2 = pc_out;      // pc
+            LR_REG:    rd2 = lr_in;       // lr
             DELTA_REG: rd2 = DELTA_CONST; // delta
             MAX_REG:   rd2 = MAX_CONST;   // max
             default: rd2 = regfile_mem[ra2];
         endcase
     end
-
-    assign pc_out = pc_in; // Refleja el PC externo
 
 endmodule

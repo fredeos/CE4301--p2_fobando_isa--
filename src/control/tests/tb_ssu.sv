@@ -37,12 +37,12 @@ module tb_ssu ();
                 P = instr[0];
                 opcode = instr[5:1];
                 #10;
-                $display("-----------------------------[INSTR[%d] = %h]-----------------------------", i, instr);
+                $display("-----------------------------[INSTR[%0d] = 0x%h]-----------------------------", i, instr);
                 $display("LOGIN = %b", login);
                 if (P) $display("Instruccion protegida (@)? Si");
                 else $display("Instruccion protegida (@)? No");
 
-                if (~ignore) $display("Omitir? Si");
+                if (ignore) $display("Omitir? Si");
                 else $display("Omitir? No");
             end
         end
