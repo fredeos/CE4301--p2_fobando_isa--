@@ -156,6 +156,8 @@ module hazard_unit #(
     logic        wb_writes_normal;
     logic        mem_writes_secure;
     logic        wb_writes_secure;
+    logic        mem_can_forward_normal;
+    logic        mem_can_forward_secure;
     logic [4:0]  mem_normal_dst;
     logic [4:0]  wb_normal_dst;
     logic [2:0]  mem_secure_dst;
@@ -164,6 +166,8 @@ module hazard_unit #(
     // Hazards load-use detectados entre ID y EX.
     logic        load_use_hazard;
     logic        secure_load_use_hazard;
+    logic        mem_load_wait_hazard;
+    logic        mem_secure_load_wait_hazard;
 
     // Una instruccion cero se trata como NOP.
     assign id_valid  = (IDInstr  != '0);
@@ -476,6 +480,8 @@ module hazard_unit #(
     assign wb_writes_normal  = writes_normal_reg(wb_valid, wb_opcode, wb_func4);
     assign mem_writes_secure = writes_secure_reg(mem_valid, mem_opcode, mem_func4);
     assign wb_writes_secure  = writes_secure_reg(wb_valid, wb_opcode, wb_func4);
+    assign mem_can_forward_normal = mem_writes_normal && !is_load_normal(mem_valid, mem_opcode);
+    assign mem_can_forward_secure = mem_writes_secure && !is_load_secure(mem_valid, mem_opcode);
 
     assign mem_normal_dst = normal_dst_reg(mem_opcode, mem_rd);
     assign wb_normal_dst  = normal_dst_reg(wb_opcode, wb_rd);
@@ -499,6 +505,23 @@ module hazard_unit #(
             (id_ssrc3_valid && (id_ssrc3 == ex_sd))
         );
 
+    // Como el forwarding desde MEM usa ALUOut, una carga en MEM aun no puede
+    // abastecer el dato leido. El consumidor debe esperar hasta WB.
+    assign mem_load_wait_hazard =
+        is_load_normal(mem_valid, mem_opcode) &&
+        (
+            (id_nsrc1_valid && (id_nsrc1 == mem_rd) && (mem_rd != REG_ZERO)) ||
+            (id_nsrc2_valid && (id_nsrc2 == mem_rd) && (mem_rd != REG_ZERO))
+        );
+
+    assign mem_secure_load_wait_hazard =
+        is_load_secure(mem_valid, mem_opcode) &&
+        (
+            (id_ssrc1_valid && (id_ssrc1 == mem_sd)) ||
+            (id_ssrc2_valid && (id_ssrc2 == mem_sd)) ||
+            (id_ssrc3_valid && (id_ssrc3 == mem_sd))
+        );
+
     always_comb begin
         // Valores por defecto: el pipeline avanza sin forwarding ni flush.
         StallIF  = 1'b0;
@@ -513,8 +536,9 @@ module hazard_unit #(
         RD2SrcEX = SRC_PIPE;
         RD3SrcEX = SRC_PIPE;
 
-        // MEM tiene prioridad sobre WB para forwarding normal.
-        if (mem_writes_normal && (mem_normal_dst != REG_ZERO)) begin
+        // MEM tiene prioridad sobre WB para forwarding normal, pero solo
+        // cuando ALUOut ya representa el dato final adelantable.
+        if (mem_can_forward_normal && (mem_normal_dst != REG_ZERO)) begin
             if (ex_nsrc1_valid && (mem_normal_dst == ex_nsrc1)) begin
                 RD1SrcEX = SRC_ALU;
             end
@@ -533,8 +557,9 @@ module hazard_unit #(
             end
         end
 
-        // MEM tiene prioridad sobre WB para forwarding seguro.
-        if (mem_writes_secure) begin
+        // MEM tiene prioridad sobre WB para forwarding seguro bajo la misma
+        // regla: ALUOut debe contener el valor final y no una direccion.
+        if (mem_can_forward_secure) begin
             if (ex_ssrc1_valid && (mem_secure_dst == ex_ssrc1)) begin
                 RD1SrcEX = SRC_ALU;
             end
@@ -589,12 +614,20 @@ module hazard_unit #(
             StallID = 1'b1;
             StallWB = 1'b1;
         end else if (branch_taken) begin
+            // Si el branch se confirma en MEM, tambien hay una instruccion
+            // especulativa ocupando EX que debe invalidarse.
             FlushIF = 1'b1;
             FlushID = 1'b1;
+            FlushEX = 1'b1;
         end else if (load_use_hazard || secure_load_use_hazard) begin
             StallIF = 1'b1;
             StallID = 1'b1;
             FlushEX = 1'b1;
+        end else if (mem_load_wait_hazard || mem_secure_load_wait_hazard) begin
+            // La instruccion consumidora se mantiene en ID hasta que el load
+            // llegue a WB, donde ya existe un bus de forwarding valido.
+            StallIF = 1'b1;
+            StallID = 1'b1;
         end
     end
 

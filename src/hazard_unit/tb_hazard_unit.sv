@@ -273,6 +273,15 @@ module tb_hazard_unit;
                       "zero_no_genera_forward");
 
         clear_inputs();
+        EXInstr  = enc_normal(OP_R, ALU_ADD, 5'd9, 5'd5, 5'd4);
+        MEMInstr = enc_normal(OP_M_LD, '0, 5'd5, 5'd1, 5'd0);
+        #1;
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+                      SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
+                      "load_en_mem_no_usa_aluout_como_forward");
+
+        clear_inputs();
         EXInstr  = enc_secure(OP_PR, ALU_ADD, 3'd6, 3'd1, 3'd2, 3'd3);
         MEMInstr = enc_secure(OP_PR, ALU_ADD, 3'd1, 3'd4, 3'd5, 3'd0);
         WBInstr  = enc_secure(OP_PI, ALU_ADD, 3'd2, 3'd7, 3'd0, 3'd0);
@@ -319,6 +328,15 @@ module tb_hazard_unit;
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "vault_store_no_genera_forward");
+
+        clear_inputs();
+        EXInstr  = enc_secure(OP_PR, ALU_ADD, 3'd6, 3'd2, 3'd4, 3'd5);
+        MEMInstr = enc_secure(OP_V_LD, '0, 3'd2, 3'd1, 3'd0, 3'd0);
+        #1;
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+                      SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
+                      "ldv_en_mem_no_usa_aluout_como_forward");
 
         clear_inputs();
         EXInstr = enc_normal(OP_M_LD, '0, 5'd5, 5'd1, 5'd0);
@@ -375,6 +393,25 @@ module tb_hazard_unit;
                       "load_use_ignora_registro_zero");
 
         clear_inputs();
+        MEMInstr = enc_normal(OP_M_LD, '0, 5'd5, 5'd1, 5'd0);
+        IDInstr  = enc_normal(OP_R, ALU_ADD, 5'd7, 5'd5, 5'd6);
+        #1;
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0,
+                      SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
+                      "stall_extra_por_load_en_mem");
+
+        clear_inputs();
+        EXInstr  = enc_normal(OP_R, ALU_SUB, 5'd9, 5'd8, 5'd7);
+        MEMInstr = enc_normal(OP_M_LD, '0, 5'd5, 5'd1, 5'd0);
+        IDInstr  = enc_normal(OP_R, ALU_ADD, 5'd7, 5'd5, 5'd6);
+        #1;
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0,
+                      SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
+                      "stall_extra_load_en_mem_sin_flush_ex");
+
+        clear_inputs();
         EXInstr = enc_secure(OP_V_LD, '0, 3'd2, 3'd1, 3'd0, 3'd0);
         IDInstr = enc_secure(OP_PR, ALU_ADD, 3'd5, 3'd2, 3'd3, 3'd0);
         #1;
@@ -411,6 +448,15 @@ module tb_hazard_unit;
                       "ldv_use_recv");
 
         clear_inputs();
+        MEMInstr = enc_secure(OP_V_LD, '0, 3'd2, 3'd1, 3'd0, 3'd0);
+        IDInstr  = enc_secure(OP_PR, ALU_ADD, 3'd5, 3'd2, 3'd3, 3'd0);
+        #1;
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0,
+                      SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
+                      "stall_extra_por_ldv_en_mem");
+
+        clear_inputs();
         EXInstr = enc_secure(OP_V_LD, '0, 3'd2, 3'd1, 3'd0, 3'd0);
         IDInstr = enc_t_send(3'd2, 5'd12);
         #1;
@@ -424,7 +470,7 @@ module tb_hazard_unit;
         IDInstr = enc_normal(OP_B, COND_BEQ, 5'd0, 5'd5, 5'd3);
         branch_taken = 1'b1;
         #1;
-        check_outputs(1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b1, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "branch_tiene_prioridad_sobre_load_use");
