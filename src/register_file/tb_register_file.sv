@@ -10,6 +10,7 @@ module tb_register_file;
 
     logic [31:0] wd;
     logic [31:0] pc_in;
+    logic [31:0] lr_in;
 
     logic [31:0] rd1;
     logic [31:0] rd2;
@@ -24,6 +25,7 @@ module tb_register_file;
         .wa(wa),
         .wd(wd),
         .pc_in(pc_in),
+        .lr_in(lr_in),
         .rd1(rd1),
         .rd2(rd2),
         .pc_out(pc_out)
@@ -56,6 +58,7 @@ module tb_register_file;
         wa     = 5'd0;
         wd     = 32'd0;
         pc_in  = 32'h00000004;
+        lr_in  = 32'h00000000;
 
         #12;
         reset = 0;
@@ -71,8 +74,8 @@ module tb_register_file;
         ra2 = 5'd3;
         #1;
         check_equal(rd1, 32'hFFFFFFFF, "max constante");
-        check_equal(rd2, 32'h00000004, "pc desde pc_in");
-        check_equal(pc_out, 32'h00000004, "pc_out refleja pc_in");
+        check_equal(rd2, 32'h00000000, "pc desde pc_out reset");
+        check_equal(pc_out, 32'h00000000, "pc_out reset");
 
         ra1 = 5'd4;
         #1;
@@ -129,7 +132,7 @@ module tb_register_file;
         #1;
         check_equal(rd1, 32'h00000000, "write bloqueado en zero");
 
-        // Bloquea escritura en pc
+        // Escritura especial en pc_out
         @(negedge clk);
         wa = 5'd3;
         wd = 32'h22222222;
@@ -140,7 +143,8 @@ module tb_register_file;
         we  = 1'b0;
         ra1 = 5'd3;
         #1;
-        check_equal(rd1, 32'h00000004, "write bloqueado en pc");
+        check_equal(rd1, 32'h22222222, "pc leido desde pc_out");
+        check_equal(pc_out, 32'h22222222, "pc_out escrito con wa pc");
 
         // Bloquea escritura en lr
         @(negedge clk);
@@ -154,6 +158,12 @@ module tb_register_file;
         ra1 = 5'd4;
         #1;
         check_equal(rd1, 32'h00000000, "write bloqueado en lr");
+
+        // Cambia lr_in dinámicamente
+        lr_in = 32'h00000088;
+        ra1   = 5'd4;
+        #1;
+        check_equal(rd1, 32'h00000088, "lr cambia con lr_in");
 
         // Bloquea escritura en delta
         @(negedge clk);
@@ -185,8 +195,8 @@ module tb_register_file;
         pc_in = 32'h00000024;
         ra2   = 5'd3;
         #1;
-        check_equal(rd2, 32'h00000024, "pc cambia con pc_in");
-        check_equal(pc_out, 32'h00000024, "pc_out cambia con pc_in");
+        check_equal(rd2, 32'h22222222, "pc no cambia con pc_in");
+        check_equal(pc_out, 32'h22222222, "pc_out no refleja pc_in");
 
         // Lectura simultánea
         ra1 = 5'd14;
