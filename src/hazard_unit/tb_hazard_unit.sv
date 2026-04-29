@@ -53,6 +53,8 @@ module tb_hazard_unit;
     logic [INSTR_WIDTH-1:0] RD1FwdEX;
     logic [INSTR_WIDTH-1:0] RD2FwdEX;
     logic [INSTR_WIDTH-1:0] RD3FwdEX;
+    logic StoreDataFwdEnMEM;
+    logic [INSTR_WIDTH-1:0] StoreDataFwdMEM;
 
     int pass_count;
 
@@ -82,7 +84,9 @@ module tb_hazard_unit;
         .RD3SrcEX(RD3SrcEX),
         .RD1FwdEX(RD1FwdEX),
         .RD2FwdEX(RD2FwdEX),
-        .RD3FwdEX(RD3FwdEX)
+        .RD3FwdEX(RD3FwdEX),
+        .StoreDataFwdEnMEM(StoreDataFwdEnMEM),
+        .StoreDataFwdMEM(StoreDataFwdMEM)
     );
 
     function automatic logic [31:0] enc_normal(
@@ -215,6 +219,25 @@ module tb_hazard_unit;
         end
     endtask
 
+    task automatic check_store_fwd(
+        input logic exp_store_fwd_en,
+        input logic [INSTR_WIDTH-1:0] exp_store_fwd_val,
+        input string test_name
+    );
+        begin
+            if ((StoreDataFwdEnMEM !== exp_store_fwd_en) ||
+                (StoreDataFwdMEM !== exp_store_fwd_val)) begin
+                $display("[FAIL] %s", test_name);
+                $display("  Got      StoreEn=%0b StoreVal=%08h", StoreDataFwdEnMEM, StoreDataFwdMEM);
+                $display("  Expected StoreEn=%0b StoreVal=%08h", exp_store_fwd_en, exp_store_fwd_val);
+                $fatal(1);
+            end else begin
+                pass_count++;
+                $display("[PASS] %s", test_name);
+            end
+        end
+    endtask
+
     initial begin
         $dumpfile("./output/wave.vcd");
         $dumpvars(0, tb_hazard_unit);
@@ -266,6 +289,30 @@ module tb_hazard_unit;
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "store_no_genera_forward");
+
+        clear_inputs();
+        EXInstr  = enc_normal(OP_M_ST, '0, 5'd5, 5'd0, 5'd0);
+        MEMInstr = enc_normal(OP_I, ALU_ADD, 5'd5, 5'd1, 5'd0);
+        #1;
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+                      SRC_PIPE, SRC_ALU, SRC_PIPE,
+                      32'h1111_1111, 32'hAAAA_AAAA, 32'h3333_3333,
+                      "store_toma_dato_forward_desde_mem");
+
+        clear_inputs();
+        EXInstr = enc_normal(OP_M_ST, '0, 5'd6, 5'd0, 5'd0);
+        WBInstr = enc_normal(OP_R, ALU_ADD, 5'd6, 5'd1, 5'd2);
+        #1;
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+                      SRC_PIPE, SRC_WB, SRC_PIPE,
+                      32'h1111_1111, 32'hBBBB_BBBB, 32'h3333_3333,
+                      "store_toma_dato_forward_desde_wb");
+
+        clear_inputs();
+        MEMInstr = enc_normal(OP_M_ST, '0, 5'd6, 5'd0, 5'd0);
+        WBInstr  = enc_normal(OP_R, ALU_ADD, 5'd6, 5'd1, 5'd2);
+        #1;
+        check_store_fwd(1'b1, 32'hBBBB_BBBB, "store_en_mem_recibe_dato_desde_wb");
 
         clear_inputs();
         EXInstr  = enc_normal(OP_R, ALU_ADD, 5'd9, 5'd0, 5'd4);
@@ -332,6 +379,12 @@ module tb_hazard_unit;
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "vault_store_no_genera_forward");
+
+        clear_inputs();
+        MEMInstr = enc_secure(OP_V_ST, '0, 3'd2, 3'd0, 3'd0, 3'd0);
+        WBInstr  = enc_secure(OP_PI, ALU_ADD, 3'd2, 3'd1, 3'd0, 3'd0);
+        #1;
+        check_store_fwd(1'b1, 32'hBBBB_BBBB, "vault_store_en_mem_recibe_dato_desde_wb");
 
         clear_inputs();
         EXInstr  = enc_secure(OP_PR, ALU_ADD, 3'd6, 3'd2, 3'd4, 3'd5);

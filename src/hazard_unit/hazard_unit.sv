@@ -34,7 +34,10 @@ module hazard_unit #(
 
     output logic [INSTR_WIDTH-1:0] RD1FwdEX,
     output logic [INSTR_WIDTH-1:0] RD2FwdEX,
-    output logic [INSTR_WIDTH-1:0] RD3FwdEX
+    output logic [INSTR_WIDTH-1:0] RD3FwdEX,
+
+    output logic StoreDataFwdEnMEM,
+    output logic [INSTR_WIDTH-1:0] StoreDataFwdMEM
 );
 
     // Codigos para seleccionar la fuente de forwarding hacia EX.
@@ -151,6 +154,10 @@ module hazard_unit #(
     logic [2:0]  ex_ssrc1;
     logic [2:0]  ex_ssrc2;
     logic [2:0]  ex_ssrc3;
+    logic        mem_store_nsrc_valid;
+    logic [4:0]  mem_store_nsrc;
+    logic        mem_store_ssrc_valid;
+    logic [2:0]  mem_store_ssrc;
 
     // Destinos producidos por instrucciones en MEM y WB.
     logic        mem_writes_normal;
@@ -478,6 +485,27 @@ module hazard_unit #(
         end
     end
 
+    always_comb begin
+        // Fuente de dato consumida por un store cuando ya esta en MEM.
+        mem_store_nsrc_valid = 1'b0;
+        mem_store_nsrc = REG_ZERO;
+        mem_store_ssrc_valid = 1'b0;
+        mem_store_ssrc = 3'd0;
+
+        case (mem_opcode)
+            OP_M_ST: begin
+                mem_store_nsrc_valid = 1'b1;
+                mem_store_nsrc = mem_rd;
+            end
+            OP_V_ST: begin
+                mem_store_ssrc_valid = 1'b1;
+                mem_store_ssrc = mem_sd;
+            end
+            default: begin
+            end
+        endcase
+    end
+
     // Calcula destinos disponibles para forwarding desde MEM y WB.
     assign mem_writes_normal = writes_normal_reg(mem_valid, mem_opcode, mem_func4);
     assign wb_writes_normal  = writes_normal_reg(wb_valid, wb_opcode, wb_func4);
@@ -556,6 +584,8 @@ module hazard_unit #(
         RD1SrcEX = SRC_PIPE;
         RD2SrcEX = SRC_PIPE;
         RD3SrcEX = SRC_PIPE;
+        StoreDataFwdEnMEM = 1'b0;
+        StoreDataFwdMEM = '0;
 
         // MEM tiene prioridad sobre WB para forwarding normal, pero solo
         // cuando ALUOut ya representa el dato final adelantable.
@@ -624,6 +654,23 @@ module hazard_unit #(
             SRC_WB:   RD3FwdEX = DataOutWB;
             default:  RD3FwdEX = RD3PipeEX;
         endcase
+
+        // El dato del store se consume en MEM. Si la instruccion productora
+        // inmediata ya llego a WB, se rescata desde DataOutWB en este punto.
+        if (mem_store_nsrc_valid &&
+            wb_writes_normal &&
+            (wb_normal_dst != REG_ZERO) &&
+            (wb_normal_dst == mem_store_nsrc)) begin
+            StoreDataFwdEnMEM = 1'b1;
+            StoreDataFwdMEM = DataOutWB;
+        end
+
+        if (mem_store_ssrc_valid &&
+            wb_writes_secure &&
+            (wb_secure_dst == mem_store_ssrc)) begin
+            StoreDataFwdEnMEM = 1'b1;
+            StoreDataFwdMEM = DataOutWB;
+        end
 
         // Prioridad de control: stalls estructurales, branch, load-use.
         if (mem_busy) begin
