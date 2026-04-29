@@ -22,6 +22,7 @@ module hazard_unit #(
     output logic StallID,
     output logic FlushID,
 
+    output logic StallEX,
     output logic FlushEX,
 
     output logic StallMEM,
@@ -168,6 +169,8 @@ module hazard_unit #(
     logic        secure_load_use_hazard;
     logic        mem_load_wait_hazard;
     logic        mem_secure_load_wait_hazard;
+    logic        ex_load_wait_hazard;
+    logic        ex_secure_load_wait_hazard;
 
     // Una instruccion cero se trata como NOP.
     assign id_valid  = (IDInstr  != '0);
@@ -522,12 +525,30 @@ module hazard_unit #(
             (id_ssrc3_valid && (id_ssrc3 == mem_sd))
         );
 
+    // Si el consumidor ya entro a EX y el productor es un load en MEM, el
+    // operando correcto aun no existe hasta WB. Hay que congelar EX.
+    assign ex_load_wait_hazard =
+        is_load_normal(mem_valid, mem_opcode) &&
+        (
+            (ex_nsrc1_valid && (ex_nsrc1 == mem_rd) && (mem_rd != REG_ZERO)) ||
+            (ex_nsrc2_valid && (ex_nsrc2 == mem_rd) && (mem_rd != REG_ZERO))
+        );
+
+    assign ex_secure_load_wait_hazard =
+        is_load_secure(mem_valid, mem_opcode) &&
+        (
+            (ex_ssrc1_valid && (ex_ssrc1 == mem_sd)) ||
+            (ex_ssrc2_valid && (ex_ssrc2 == mem_sd)) ||
+            (ex_ssrc3_valid && (ex_ssrc3 == mem_sd))
+        );
+
     always_comb begin
         // Valores por defecto: el pipeline avanza sin forwarding ni flush.
         StallIF  = 1'b0;
         FlushIF  = 1'b0;
         StallID  = 1'b0;
         FlushID  = 1'b0;
+        StallEX  = 1'b0;
         FlushEX  = 1'b0;
         StallMEM = 1'b0;
         StallWB  = 1'b0;
@@ -608,11 +629,14 @@ module hazard_unit #(
         if (mem_busy) begin
             StallIF  = 1'b1;
             StallID  = 1'b1;
+            StallEX  = 1'b1;
             StallMEM = 1'b1;
         end else if (wb_busy) begin
-            StallIF = 1'b1;
-            StallID = 1'b1;
-            StallWB = 1'b1;
+            StallIF  = 1'b1;
+            StallID  = 1'b1;
+            StallEX  = 1'b1;
+            StallMEM = 1'b1;
+            StallWB  = 1'b1;
         end else if (branch_taken) begin
             // Si el branch se confirma en MEM, tambien hay una instruccion
             // especulativa ocupando EX que debe invalidarse.
@@ -623,6 +647,10 @@ module hazard_unit #(
             StallIF = 1'b1;
             StallID = 1'b1;
             FlushEX = 1'b1;
+        end else if (ex_load_wait_hazard || ex_secure_load_wait_hazard) begin
+            StallIF = 1'b1;
+            StallID = 1'b1;
+            StallEX = 1'b1;
         end else if (mem_load_wait_hazard || mem_secure_load_wait_hazard) begin
             // La instruccion consumidora se mantiene en ID hasta que el load
             // llegue a WB, donde ya existe un bus de forwarding valido.

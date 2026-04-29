@@ -42,6 +42,7 @@ module tb_hazard_unit;
     logic FlushIF;
     logic StallID;
     logic FlushID;
+    logic StallEX;
     logic FlushEX;
     logic StallMEM;
     logic StallWB;
@@ -72,6 +73,7 @@ module tb_hazard_unit;
         .FlushIF(FlushIF),
         .StallID(StallID),
         .FlushID(FlushID),
+        .StallEX(StallEX),
         .FlushEX(FlushEX),
         .StallMEM(StallMEM),
         .StallWB(StallWB),
@@ -172,6 +174,7 @@ module tb_hazard_unit;
         input logic exp_flush_if,
         input logic exp_stall_id,
         input logic exp_flush_id,
+        input logic exp_stall_ex,
         input logic exp_flush_ex,
         input logic exp_stall_mem,
         input logic exp_stall_wb,
@@ -188,6 +191,7 @@ module tb_hazard_unit;
                 (FlushIF !== exp_flush_if) ||
                 (StallID !== exp_stall_id) ||
                 (FlushID !== exp_flush_id) ||
+                (StallEX !== exp_stall_ex) ||
                 (FlushEX !== exp_flush_ex) ||
                 (StallMEM !== exp_stall_mem) ||
                 (StallWB !== exp_stall_wb) ||
@@ -199,10 +203,10 @@ module tb_hazard_unit;
                 (RD3FwdEX !== exp_rd3_val)) begin
 
                 $display("[FAIL] %s", test_name);
-                $display("  Got      StallIF=%0b FlushIF=%0b StallID=%0b FlushID=%0b FlushEX=%0b StallMEM=%0b StallWB=%0b RD1=%02b RD2=%02b RD3=%02b V1=%08h V2=%08h V3=%08h",
-                         StallIF, FlushIF, StallID, FlushID, FlushEX, StallMEM, StallWB, RD1SrcEX, RD2SrcEX, RD3SrcEX, RD1FwdEX, RD2FwdEX, RD3FwdEX);
-                $display("  Expected StallIF=%0b FlushIF=%0b StallID=%0b FlushID=%0b FlushEX=%0b StallMEM=%0b StallWB=%0b RD1=%02b RD2=%02b RD3=%02b V1=%08h V2=%08h V3=%08h",
-                         exp_stall_if, exp_flush_if, exp_stall_id, exp_flush_id, exp_flush_ex, exp_stall_mem, exp_stall_wb, exp_rd1, exp_rd2, exp_rd3, exp_rd1_val, exp_rd2_val, exp_rd3_val);
+                $display("  Got      StallIF=%0b FlushIF=%0b StallID=%0b FlushID=%0b StallEX=%0b FlushEX=%0b StallMEM=%0b StallWB=%0b RD1=%02b RD2=%02b RD3=%02b V1=%08h V2=%08h V3=%08h",
+                         StallIF, FlushIF, StallID, FlushID, StallEX, FlushEX, StallMEM, StallWB, RD1SrcEX, RD2SrcEX, RD3SrcEX, RD1FwdEX, RD2FwdEX, RD3FwdEX);
+                $display("  Expected StallIF=%0b FlushIF=%0b StallID=%0b FlushID=%0b StallEX=%0b FlushEX=%0b StallMEM=%0b StallWB=%0b RD1=%02b RD2=%02b RD3=%02b V1=%08h V2=%08h V3=%08h",
+                         exp_stall_if, exp_flush_if, exp_stall_id, exp_flush_id, exp_stall_ex, exp_flush_ex, exp_stall_mem, exp_stall_wb, exp_rd1, exp_rd2, exp_rd3, exp_rd1_val, exp_rd2_val, exp_rd3_val);
                 $fatal(1);
             end else begin
                 pass_count++;
@@ -219,7 +223,7 @@ module tb_hazard_unit;
         $display("Iniciando pruebas de hazard_unit");
 
         clear_inputs();
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "sin_hazard");
@@ -229,7 +233,7 @@ module tb_hazard_unit;
         MEMInstr = enc_normal(OP_I, ALU_ADD, 5'd3, 5'd1, 5'd0);
         WBInstr  = enc_normal(OP_I, ALU_ADD, 5'd4, 5'd2, 5'd0);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_ALU, SRC_WB, SRC_PIPE,
                       32'hAAAA_AAAA, 32'hBBBB_BBBB, 32'h3333_3333,
                       "forward_normal_mem_rd1_y_wb_rd2");
@@ -238,7 +242,7 @@ module tb_hazard_unit;
         EXInstr  = enc_normal(OP_R, ALU_ADD, 5'd9, 5'd8, 5'd3);
         MEMInstr = enc_normal(OP_I, ALU_ADD, 5'd3, 5'd1, 5'd0);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_ALU, SRC_PIPE,
                       32'h1111_1111, 32'hAAAA_AAAA, 32'h3333_3333,
                       "forward_normal_mem_rd2");
@@ -248,7 +252,7 @@ module tb_hazard_unit;
         MEMInstr = enc_normal(OP_I, ALU_ADD, 5'd3, 5'd1, 5'd0);
         WBInstr  = enc_normal(OP_I, ALU_ADD, 5'd3, 5'd2, 5'd0);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_ALU, SRC_PIPE, SRC_PIPE,
                       32'hAAAA_AAAA, 32'h2222_2222, 32'h3333_3333,
                       "prioridad_forward_mem_sobre_wb");
@@ -258,7 +262,7 @@ module tb_hazard_unit;
         MEMInstr = enc_normal(OP_M_ST, '0, 5'd3, 5'd1, 5'd0);
         WBInstr  = enc_normal(OP_M_ST, '0, 5'd4, 5'd2, 5'd0);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "store_no_genera_forward");
@@ -267,7 +271,7 @@ module tb_hazard_unit;
         EXInstr  = enc_normal(OP_R, ALU_ADD, 5'd9, 5'd0, 5'd4);
         MEMInstr = enc_normal(OP_I, ALU_ADD, 5'd0, 5'd1, 5'd0);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "zero_no_genera_forward");
@@ -276,17 +280,17 @@ module tb_hazard_unit;
         EXInstr  = enc_normal(OP_R, ALU_ADD, 5'd9, 5'd5, 5'd4);
         MEMInstr = enc_normal(OP_M_LD, '0, 5'd5, 5'd1, 5'd0);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
-                      "load_en_mem_no_usa_aluout_como_forward");
+                      "load_en_mem_stallea_ex_hasta_wb");
 
         clear_inputs();
         EXInstr  = enc_secure(OP_PR, ALU_ADD, 3'd6, 3'd1, 3'd2, 3'd3);
         MEMInstr = enc_secure(OP_PR, ALU_ADD, 3'd1, 3'd4, 3'd5, 3'd0);
         WBInstr  = enc_secure(OP_PI, ALU_ADD, 3'd2, 3'd7, 3'd0, 3'd0);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_ALU, SRC_WB, SRC_PIPE,
                       32'hAAAA_AAAA, 32'hBBBB_BBBB, 32'h3333_3333,
                       "forward_seguro_mem_rd1_y_wb_rd2");
@@ -295,7 +299,7 @@ module tb_hazard_unit;
         EXInstr  = enc_secure(OP_PR, ALU_ADD, 3'd6, 3'd1, 3'd2, 3'd3);
         MEMInstr = enc_secure(OP_PR, ALU_ADD, 3'd3, 3'd4, 3'd5, 3'd0);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_ALU,
                       32'h1111_1111, 32'h2222_2222, 32'hAAAA_AAAA,
                       "forward_seguro_mem_rd3");
@@ -304,7 +308,7 @@ module tb_hazard_unit;
         EXInstr  = enc_secure(OP_PR, ALU_ADD, 3'd6, 3'd1, 3'd2, 3'd3);
         WBInstr  = enc_secure(OP_PI, ALU_ADD, 3'd3, 3'd0, 3'd0, 3'd0);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_WB,
                       32'h1111_1111, 32'h2222_2222, 32'hBBBB_BBBB,
                       "forward_seguro_wb_rd3");
@@ -314,7 +318,7 @@ module tb_hazard_unit;
         MEMInstr = enc_secure(OP_PR, ALU_ADD, 3'd1, 3'd0, 3'd0, 3'd0);
         WBInstr  = enc_secure(OP_PI, ALU_ADD, 3'd1, 3'd0, 3'd0, 3'd0);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_ALU, SRC_PIPE, SRC_PIPE,
                       32'hAAAA_AAAA, 32'h2222_2222, 32'h3333_3333,
                       "prioridad_forward_seguro_mem_sobre_wb");
@@ -324,7 +328,7 @@ module tb_hazard_unit;
         MEMInstr = enc_secure(OP_V_ST, '0, 3'd1, 3'd4, 3'd0, 3'd0);
         WBInstr  = enc_secure(OP_V_ST, '0, 3'd2, 3'd5, 3'd0, 3'd0);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "vault_store_no_genera_forward");
@@ -333,16 +337,26 @@ module tb_hazard_unit;
         EXInstr  = enc_secure(OP_PR, ALU_ADD, 3'd6, 3'd2, 3'd4, 3'd5);
         MEMInstr = enc_secure(OP_V_LD, '0, 3'd2, 3'd1, 3'd0, 3'd0);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
-                      "ldv_en_mem_no_usa_aluout_como_forward");
+                      "ldv_en_mem_stallea_ex_hasta_wb");
+
+        clear_inputs();
+        EXInstr  = enc_secure(OP_PI, ALU_ADD, 3'd2, 3'd1, 3'd0, 3'd0);
+        MEMInstr = enc_secure(OP_V_LD, '0, 3'd1, 3'd0, 3'd0, 3'd0);
+        IDInstr  = enc_secure(OP_V_ST, '0, 3'd2, 3'd0, 3'd0, 3'd0);
+        #1;
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0,
+                      SRC_PIPE, SRC_PIPE, SRC_PIPE,
+                      32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
+                      "patron_ldv_pi_stall_ex");
 
         clear_inputs();
         EXInstr = enc_normal(OP_M_LD, '0, 5'd5, 5'd1, 5'd0);
         IDInstr = enc_normal(OP_R, ALU_ADD, 5'd7, 5'd5, 5'd6);
         #1;
-        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "load_use_normal_por_rn");
@@ -351,7 +365,7 @@ module tb_hazard_unit;
         EXInstr = enc_normal(OP_M_LD, '0, 5'd5, 5'd1, 5'd0);
         IDInstr = enc_normal(OP_R, ALU_ADD, 5'd7, 5'd6, 5'd5);
         #1;
-        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "load_use_normal_por_rm");
@@ -360,7 +374,7 @@ module tb_hazard_unit;
         EXInstr = enc_normal(OP_M_LD, '0, 5'd5, 5'd1, 5'd0);
         IDInstr = enc_normal(OP_M_ST, '0, 5'd5, 5'd9, 5'd0);
         #1;
-        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "load_use_normal_store_data");
@@ -369,7 +383,7 @@ module tb_hazard_unit;
         EXInstr = enc_normal(OP_M_LD, '0, 5'd5, 5'd1, 5'd0);
         IDInstr = enc_normal(OP_I, ALU_ADD, 5'd8, 5'd5, 5'd0);
         #1;
-        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "load_use_normal_tipo_i");
@@ -378,7 +392,7 @@ module tb_hazard_unit;
         EXInstr = enc_normal(OP_M_LD, '0, 5'd5, 5'd1, 5'd0);
         IDInstr = enc_normal(OP_I, ALU_ADD, 5'd5, 5'd0, 5'd0);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "sin_load_use_si_no_lee_destino");
@@ -387,7 +401,7 @@ module tb_hazard_unit;
         EXInstr = enc_normal(OP_M_LD, '0, 5'd0, 5'd1, 5'd0);
         IDInstr = enc_normal(OP_R, ALU_ADD, 5'd7, 5'd0, 5'd6);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "load_use_ignora_registro_zero");
@@ -396,7 +410,7 @@ module tb_hazard_unit;
         MEMInstr = enc_normal(OP_M_LD, '0, 5'd5, 5'd1, 5'd0);
         IDInstr  = enc_normal(OP_R, ALU_ADD, 5'd7, 5'd5, 5'd6);
         #1;
-        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "stall_extra_por_load_en_mem");
@@ -406,7 +420,7 @@ module tb_hazard_unit;
         MEMInstr = enc_normal(OP_M_LD, '0, 5'd5, 5'd1, 5'd0);
         IDInstr  = enc_normal(OP_R, ALU_ADD, 5'd7, 5'd5, 5'd6);
         #1;
-        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "stall_extra_load_en_mem_sin_flush_ex");
@@ -415,7 +429,7 @@ module tb_hazard_unit;
         EXInstr = enc_secure(OP_V_LD, '0, 3'd2, 3'd1, 3'd0, 3'd0);
         IDInstr = enc_secure(OP_PR, ALU_ADD, 3'd5, 3'd2, 3'd3, 3'd0);
         #1;
-        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "ldv_use_seguro_por_sn");
@@ -424,7 +438,7 @@ module tb_hazard_unit;
         EXInstr = enc_secure(OP_V_LD, '0, 3'd2, 3'd1, 3'd0, 3'd0);
         IDInstr = enc_secure(OP_PR, ALU_ADD, 3'd5, 3'd3, 3'd2, 3'd0);
         #1;
-        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "ldv_use_seguro_por_sm");
@@ -433,7 +447,7 @@ module tb_hazard_unit;
         EXInstr = enc_secure(OP_V_LD, '0, 3'd2, 3'd1, 3'd0, 3'd0);
         IDInstr = enc_secure(OP_PR, ALU_ADD, 3'd5, 3'd3, 3'd4, 3'd2);
         #1;
-        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "ldv_use_seguro_por_sf");
@@ -442,7 +456,7 @@ module tb_hazard_unit;
         EXInstr = enc_secure(OP_V_LD, '0, 3'd2, 3'd1, 3'd0, 3'd0);
         IDInstr = enc_t_recv(5'd12, 3'd2);
         #1;
-        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "ldv_use_recv");
@@ -451,7 +465,7 @@ module tb_hazard_unit;
         MEMInstr = enc_secure(OP_V_LD, '0, 3'd2, 3'd1, 3'd0, 3'd0);
         IDInstr  = enc_secure(OP_PR, ALU_ADD, 3'd5, 3'd2, 3'd3, 3'd0);
         #1;
-        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "stall_extra_por_ldv_en_mem");
@@ -460,7 +474,7 @@ module tb_hazard_unit;
         EXInstr = enc_secure(OP_V_LD, '0, 3'd2, 3'd1, 3'd0, 3'd0);
         IDInstr = enc_t_send(3'd2, 5'd12);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "send_no_lee_sd");
@@ -470,7 +484,7 @@ module tb_hazard_unit;
         IDInstr = enc_normal(OP_B, COND_BEQ, 5'd0, 5'd5, 5'd3);
         branch_taken = 1'b1;
         #1;
-        check_outputs(1'b0, 1'b1, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "branch_tiene_prioridad_sobre_load_use");
@@ -479,7 +493,7 @@ module tb_hazard_unit;
         branch_taken = 1'b1;
         mem_busy = 1'b1;
         #1;
-        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "mem_busy_tiene_prioridad_sobre_flush");
@@ -487,7 +501,7 @@ module tb_hazard_unit;
         clear_inputs();
         wb_busy = 1'b1;
         #1;
-        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b1,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b1,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "wb_busy_stall");
@@ -496,7 +510,7 @@ module tb_hazard_unit;
         branch_taken = 1'b1;
         wb_busy = 1'b1;
         #1;
-        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b1,
+        check_outputs(1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b1, 1'b1,
                       SRC_PIPE, SRC_PIPE, SRC_PIPE,
                       32'h1111_1111, 32'h2222_2222, 32'h3333_3333,
                       "wb_busy_tiene_prioridad_sobre_branch");
@@ -505,7 +519,7 @@ module tb_hazard_unit;
         EXInstr  = enc_normal(OP_R, ALU_ADD, 5'd8, 5'd1, 5'd0);
         WBInstr  = enc_normal(OP_JF, '0, 5'd1, 5'd0, 5'd0);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_WB, SRC_PIPE, SRC_PIPE,
                       32'hBBBB_BBBB, 32'h2222_2222, 32'h3333_3333,
                       "jal_forward_a_ra");
@@ -514,7 +528,7 @@ module tb_hazard_unit;
         EXInstr  = enc_normal(OP_R, ALU_ADD, 5'd8, 5'd12, 5'd0);
         WBInstr  = enc_t_recv(5'd12, 3'd6);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_WB, SRC_PIPE, SRC_PIPE,
                       32'hBBBB_BBBB, 32'h2222_2222, 32'h3333_3333,
                       "recv_forward_a_registro_normal");
@@ -523,7 +537,7 @@ module tb_hazard_unit;
         EXInstr  = enc_secure(OP_PR, ALU_ADD, 3'd5, 3'd6, 3'd1, 3'd2);
         MEMInstr = enc_t_send(3'd6, 5'd12);
         #1;
-        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
+        check_outputs(1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0,
                       SRC_ALU, SRC_PIPE, SRC_PIPE,
                       32'hAAAA_AAAA, 32'h2222_2222, 32'h3333_3333,
                       "send_forward_a_registro_seguro");
