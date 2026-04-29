@@ -112,7 +112,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
         .ignore(Ignore)
     );
 
-    assign IF_INSTR = (Ignore) nop : INSTR;
+    assign IF_INSTR = (Ignore) ? nop : INSTR;
 
     // --- 2. Instruction Decode (ID) ---
     // + Flip-Flop para pipe ID
@@ -178,8 +178,8 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
         .pc_out(PC_new)
     );
 
-    assign ID_Op1 = (ID_RSel[0]) ID_RegRD1 : ID_SecRD1;
-    assign ID_Op2 = (ID_RSel[1]) ID_RegRD2 : ID_SecRD2;
+    assign ID_Op1 = (ID_RSel[0]) ? ID_RegRD1 : ID_SecRD1;
+    assign ID_Op2 = (ID_RSel[1]) ? ID_RegRD2 : ID_SecRD2;
     // >> Unidad de extension de inmediatos
     imm_ext32 _imm_ext (
         .source(ID_INSTR[31:6]),
@@ -360,7 +360,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     end
 
     // + Seleccionar señales de salida
-    assign WB_DataOut = (WB_MemToReg[1]) ? ( (WB_MemToReg[0]) WB_PCplus4 : WB_MemOut) : ( (WB_MemToReg[0]) ? WB_ALUOut : WB_ALUOut);
+    assign WB_DataOut = (WB_MemToReg[1]) ? ( (WB_MemToReg[0]) ? WB_PCplus4 : WB_MemOut) : ( (WB_MemToReg[0]) ? WB_ALUOut : WB_ALUOut);
 
     // --- 6. Unidad de Riesgos (Hazard Unit) ---
     hazard_unit #(.INSTR_WIDTH(32)) _hazard_unit (

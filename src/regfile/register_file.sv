@@ -32,8 +32,11 @@ module register_file #(
     localparam logic [DATA_WIDTH-1:0] DELTA_CONST   = 32'h9E3779B9; // Constante TEA
     localparam logic [DATA_WIDTH-1:0] MAX_CONST     = 32'hFFFFFFFF; // Constante fija
 
+    // --- Asignacion directa de registros ---
     assign pc_out = (we && (wa == PC_REG)) ? wd : pc_in;
-    always_ff @(posedge clk) begin
+
+    // --- Logica secuencial (escritura) ---
+    always_ff @(posedge clk, posedge reset) begin
         if (reset) begin
             // Limpia todos los registros internos
             for (i = 0; i < DEPTH; i = i + 1) begin
@@ -52,9 +55,10 @@ module register_file #(
         end
     end
 
+    // --- Logica combinacional (lectura) ---
     always_comb begin
         // Lectura del primer operando
-        unique case (ra1)
+        case (ra1)
             ZERO_REG:  rd1 = '0;          // zero
             PC_REG:    rd1 = pc_out;      // pc
             LR_REG:    rd1 = lr_in;       // lr
@@ -64,7 +68,7 @@ module register_file #(
         endcase
 
         // Lectura del segundo operando
-        unique case (ra2)
+        case (ra2)
             ZERO_REG:  rd2 = '0;          // zero
             PC_REG:    rd2 = pc_out;      // pc
             LR_REG:    rd2 = lr_in;       // lr

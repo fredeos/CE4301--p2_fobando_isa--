@@ -24,7 +24,8 @@ module secure_memory #(
     logic [DATA_WIDTH-1:0] mem [0:DEPTH-1]; // Registros seguros
     integer i;                              // Índice de reset
 
-    always_ff @(posedge clk) begin
+    // --- Logica secuencial (escritura) ---
+    always_ff @(posedge clk, negedge rst_n) begin
         if (!rst_n) begin
             // Limpia la memoria segura
             for (i = 0; i < DEPTH; i = i + 1) begin
@@ -36,6 +37,7 @@ module secure_memory #(
         end
     end
 
+    // --- Logica combinacional (lectura) ---
     always_comb begin
         // Lectura write-first
         rd1 = (ra1 == AX_REG) ? '0 : ((we && (wa == ra1)) ? wd : mem[ra1]);
