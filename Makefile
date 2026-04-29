@@ -103,9 +103,13 @@ Datapath:
 	mkdir -p ./output
 	iverilog -g2012 -o ./output/sim.out ${cpu} ${dirDATAPATHtb}/tb_datapath.sv
 
+
 run:
 	vvp ./output/sim.out
 	gtkwave ./output/wave.vcd
+
+program_load:
+	python ./src/load_file.py --input ./input/$(TARGET) --output ./instrmem/instr_mem.hex --address 0x0
 
 clean:
 	rm ./output/**

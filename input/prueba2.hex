@@ -5,3 +5,5 @@
 0108C500 // mul r3, r3, r2
 0017BC82 // addi r1, r1, 1
 FEE7F490 // bne r1, r0, -3
+0040460A // stw r3,+ 4(zero)
+FFE03CCA // stb r1,- -2(zero)

@@ -2,7 +2,10 @@ module tb_datapath ();
     logic clk, rst;
 
     localparam cycles = 500;
+    logic [31:0] cycle;
+
     always #5 clk = ~clk;
+    always_ff @(posedge clk) cycle <= cycle + 1;
 
     datapath _cpu (
         .clk(clk), 
@@ -15,6 +18,7 @@ module tb_datapath ();
         $display("[Inicio del testbench]");
 
         // Inicializar el procesdor
+        cycle = '0;
         clk = 0;
         rst = 1;
         #5; rst = 0; #5;

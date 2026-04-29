@@ -149,7 +149,7 @@
 **NOTAS**:
 
 - Las notaciones $R[...]$, $M[...]$, $S[...]$, $V[...]$ significan accesos a registros, memoria, registros seguros y boveda, respectivamente.
-- En las instrucciones **J** y **B** el valor del inmediato representa la distancia de salto hacia una instruccion con un *label* (generalmente calculada por el compilador). Esta se calcula $imm = instr[j] - instr[i] $; donde $i$ representa el indice de la instruccion actual y $j$ representa el indice de la instruccion hacia donde se desea saltar.
+- En las instrucciones **J** y **B** el valor del inmediato representa la distancia de salto hacia una instruccion con un *label* (generalmente calculada por el compilador). Esta se calcula $imm = instr[j] - instr[i] $; donde $i$ representa el indice de la sigueinte instruccion a la actual (PC+4) y $j$ representa el indice de la instruccion hacia donde se desea saltar.
 - Las instrucciones de tipo **PR** permiten múltiples combinaciones para la selección de operaciones, para esto refierase a las tablas de encodificación para operaciones de ALU primaria y secundaria
 
 **TIPOS DE INSTRUCCIONES**:
@@ -348,12 +348,12 @@
 
 | cond  | comparacion |
 |-------|-------------|
-| 0000  | `BEQ`($==$) |
-| 0001  | `BNE`($!=$) |
-| 0010  | `BGT`($>$)  |
-| 0011  | `BLT`($<$)  |
-| 0100  | `BGE`($>=$) |
-| 0101  | `BLE`($<=$) |
+| 0001  | `BEQ`($==$) |
+| 0010  | `BNE`($!=$) |
+| 0011  | `BGT`($>$)  |
+| 0100  | `BLT`($<$)  |
+| 0101  | `BGE`($>=$) |
+| 0110  | `BLE`($<=$) |
 
 ### Convención de para definicion de funciones
 Para definir y hacer llamadas a funciones en programas de ensamblador, se deben utilizar llamadas a funciones utilizando `call`, además cada función debe cumplir con la convención de uso y guardado de registros para garantizar la integridad de los datos entre llamadas. Para este efecto se manipula el stack para almacenar registros en memoria al inicio de una llamada y restaurarlos al finalizar la función. El convenio de registros establecido asigna los registros `p0-p8` para argumentos y retorno de funciones, `r0-r15` para uso general, `ra` para direcciones de retorno y `sp` para puntero del stack en memoria.

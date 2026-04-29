@@ -60,7 +60,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     logic [1:0]  EX_Op1Sel, EX_Op2Sel, EX_Op3Sel;
     logic [31:0] EX_Op1Fwd, EX_Op2Fwd, EX_Op3Fwd;
     // + Señales de riesgos
-    logic EX_CLR;
+    logic EX_EN, EX_CLR;
 
     // [Memory access (MEM)]
     // + Señales de etapa
@@ -209,7 +209,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
             EX_MemBytes <= '0;
             EX_RegWrite <= '0;
             EX_MemToReg <= '0;
-        end else begin 
+        end else if (~EX_EN) begin 
             EX_INSTR <= ID_INSTR;
             EX_PCplus4 <= ID_PCplus4;
             EX_Op1 <= ID_Op1;
@@ -375,7 +375,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
         .wb_busy(1'b0),
         .StallIF(IF_EN), .FlushIF(IF_CLR),
         .StallID(ID_EN), .FlushID(ID_CLR),
-        .FlushEX(EX_CLR),
+        .StallEX(EX_EN), .FlushEX(EX_CLR),
         .StallMEM(MEM_EN),
         .StallWB(WB_EN),
         .RD1SrcEX(EX_Op1Sel), .RD2SrcEX(EX_Op2Sel), .RD3SrcEX(EX_Op3Sel),
