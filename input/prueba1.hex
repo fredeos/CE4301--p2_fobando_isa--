@@ -1,8 +1,8 @@
 @00000000
-00001A08  // ldw p1,+ 0(zero)
 00F03882  // movi r0, 15
 FF704082  // movi r2, -9
 01073CC0  // sub r1, r0, r2
 00079480  // mov p0, r1
+00001A08  // ldw p1,+ 0(zero)
 FFF31D02  // muli p2, p1, -1
 00301D0A  // sth p2,+ 3(zero)

@@ -1,7 +1,8 @@
-00503882 // movi r0, 5
-00003C80 // mov r1, zero
-00204082 // movi r2, 2
-0017C482 // addi r3, r1, 1
-0108C500 // mul r3, r3, r2
-0017BC82 // addi r1, r1, 1
-FEE7F490 // bne r1, r0, -3
+00C03888 // ldb r0,+ 12(zero)
+00503C82 // movi r1, 5
+FFE04082 // movi r2, -2
+A9C1F022 // login 0xA9C1F
+00024480 // mov r3, lr
+00F74081 // @add r2, r0, r1
+00000062 // quit
+0040420A // stw r2,+ 4(zero)

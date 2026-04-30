@@ -64,7 +64,7 @@ module register_file #(
             LR_REG:    rd1 = lr_in;       // lr
             DELTA_REG: rd1 = DELTA_CONST; // delta
             MAX_REG:   rd1 = MAX_CONST;   // max
-            default: rd1 = regfile_mem[ra1];
+            default: rd1 = (ra1 == wa) ? wd : regfile_mem[ra1];
         endcase
 
         // Lectura del segundo operando
@@ -74,7 +74,7 @@ module register_file #(
             LR_REG:    rd2 = lr_in;       // lr
             DELTA_REG: rd2 = DELTA_CONST; // delta
             MAX_REG:   rd2 = MAX_CONST;   // max
-            default: rd2 = regfile_mem[ra2];
+            default: rd2 = (ra2 == wa) ? wd : regfile_mem[ra2];
         endcase
     end
 

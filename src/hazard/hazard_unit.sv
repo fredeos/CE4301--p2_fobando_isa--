@@ -26,6 +26,8 @@ module hazard_unit #(
     output logic FlushEX,
 
     output logic StallMEM,
+    output logic FlushMEM,
+
     output logic StallWB,
 
     output logic [1:0] RD1SrcEX,
@@ -44,6 +46,9 @@ module hazard_unit #(
 
     // Registro cero usado para ignorar dependencias falsas.
     localparam logic [4:0] REG_ZERO = 5'd0;
+
+    // Instrucciones nop invalida
+    localparam logic [31:0] nop = 32'h00000080;
 
     // Opcodes segun la tabla de encodificacion del ISA.md
     localparam logic [4:0] OP_R    = 5'b00000; // add
@@ -81,6 +86,12 @@ module hazard_unit #(
     logic        ex_valid;
     logic        mem_valid;
     logic        wb_valid;
+
+    // Indicar si cada etapa tiene una instruccion tipo S
+    logic       id_session;
+    logic       ex_session;
+    logic       mem_session;
+    logic       wb_session;
 
     // Bit P extraido del formato de instruccion.
     logic        id_p;
@@ -175,10 +186,10 @@ module hazard_unit #(
     logic        ex_secure_store_data_wait_hazard;
 
     // Una instruccion cero se trata como NOP.
-    assign id_valid  = (IDInstr  != '0);
-    assign ex_valid  = (EXInstr  != '0);
-    assign mem_valid = (MEMInstr != '0);
-    assign wb_valid  = (WBInstr  != '0);
+    assign id_valid  = (IDInstr  != nop);
+    assign ex_valid  = (EXInstr  != nop);
+    assign mem_valid = (MEMInstr != nop);
+    assign wb_valid  = (WBInstr  != nop);
 
     // El bit P ocupa el bit menos significativo.
     assign id_p       = IDInstr[0];
@@ -191,6 +202,12 @@ module hazard_unit #(
     assign ex_opcode  = EXInstr[5:1];
     assign mem_opcode = MEMInstr[5:1];
     assign wb_opcode  = WBInstr[5:1];
+
+    // Una instruccion se trata como LOGIN o QUIT.
+    assign id_session  = (id_opcode  == OP_S);
+    assign ex_session  = (ex_opcode  == OP_S);
+    assign mem_session = (mem_opcode == OP_S);
+    assign wb_session  = (wb_opcode  == OP_S);
 
     // func4 y cond comparten los bits [9:6].
     assign id_func4   = IDInstr[9:6];
@@ -372,8 +389,8 @@ module hazard_unit #(
                 OP_V_ST: begin
                     id_ssrc1_valid = 1'b1;
                     id_ssrc2_valid = 1'b1;
-                    id_ssrc1 = id_sd;
-                    id_ssrc2 = id_sn;
+                    id_ssrc1 = id_sn;
+                    id_ssrc2 = id_sd;
                 end
                 OP_T: begin
                     case (id_func4)
@@ -382,8 +399,8 @@ module hazard_unit #(
                             id_nsrc1 = id_rn;
                         end
                         T_RECV: begin
-                            id_ssrc1_valid = 1'b1;
-                            id_ssrc1 = id_sm;
+                            id_ssrc2_valid = 1'b1;
+                            id_ssrc2 = id_sm;
                         end
                         default: begin
                         end
@@ -457,8 +474,8 @@ module hazard_unit #(
                 OP_V_ST: begin
                     ex_ssrc1_valid = 1'b1;
                     ex_ssrc2_valid = 1'b1;
-                    ex_ssrc1 = ex_sd;
-                    ex_ssrc2 = ex_sn;
+                    ex_ssrc1 = ex_sn;
+                    ex_ssrc2 = ex_sd;
                 end
                 OP_T: begin
                     case (ex_func4)
@@ -467,8 +484,8 @@ module hazard_unit #(
                             ex_nsrc1 = ex_rn;
                         end
                         T_RECV: begin
-                            ex_ssrc1_valid = 1'b1;
-                            ex_ssrc1 = ex_sm;
+                            ex_ssrc2_valid = 1'b1;
+                            ex_ssrc2 = ex_sm;
                         end
                         default: begin
                         end
@@ -567,6 +584,7 @@ module hazard_unit #(
         StallEX  = 1'b0;
         FlushEX  = 1'b0;
         StallMEM = 1'b0;
+        FlushMEM = 1'b0;
         StallWB  = 1'b0;
 
         RD1SrcEX = SRC_PIPE;
@@ -641,7 +659,7 @@ module hazard_unit #(
             default:  RD3FwdEX = RD3PipeEX;
         endcase
 
-        // Prioridad de control: stalls estructurales, branch, load-use.
+        // Prioridad de control: stalls estructurales, branch, sesiones de admin, load-use.
         if (mem_busy) begin
             StallIF  = 1'b1;
             StallID  = 1'b1;
@@ -659,6 +677,18 @@ module hazard_unit #(
             FlushIF = 1'b0;
             FlushID = 1'b1;
             FlushEX = 1'b1;
+            FlushMEM = 1'b1;
+        end else if (id_session) begin
+            // Si hay una instruccion S en el pipeline se debe detener el ingreso de
+            // de nuevas instrucciones hasta que se determine si fue exitoso o no
+            StallIF = 1'b1;
+            FlushID = 1'b1;
+        end else if (ex_session) begin
+            // Si hay una instruccion S en el pipeline se debe detener el ingreso de
+            // de nuevas instrucciones hasta que se determine si fue exitoso o no
+            StallIF = 1'b1;
+            StallID = 1'b1;
+            FlushEX = 1'b1;
         end else if (load_use_hazard || secure_load_use_hazard) begin
             StallIF = 1'b1;
             StallID = 1'b1;
@@ -674,8 +704,8 @@ module hazard_unit #(
         end else if (mem_load_wait_hazard || mem_secure_load_wait_hazard) begin
             // La instruccion consumidora se mantiene en ID hasta que el load
             // llegue a WB, donde ya existe un bus de forwarding valido.
-            StallIF = 1'b1;
-            StallID = 1'b1;
+            //StallIF = 1'b1;
+            //StallID = 1'b1;
         end
     end
 

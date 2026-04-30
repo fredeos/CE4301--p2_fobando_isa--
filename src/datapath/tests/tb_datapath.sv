@@ -1,3 +1,5 @@
+`timescale 1ms / 1ps
+
 module tb_datapath ();
     logic clk, rst;
 
@@ -19,7 +21,7 @@ module tb_datapath ();
 
         // Inicializar el procesdor
         cycle = '0;
-        clk = 0;
+        clk = 1;
         rst = 1;
         #5; rst = 0; #5;
 

@@ -6,6 +6,6 @@
 // Direccion 0x08: Patrones de bits alternados
 00000000
 // Direccion 0x0C: Valores maximos
-00000000
+0000FF1A
 // Direccion 0x10: Secuencia incremental
 00000000

@@ -74,7 +74,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     logic [7:0] MEM_MemBytes;
     logic [4:0] MEM_Branch;
     // + Señales de riesgos
-    logic MEM_EN;
+    logic MEM_EN, MEM_CLR;
 
     // [Writeback (WB)]
     // + Señales de etapa
@@ -263,7 +263,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     // --- 4. Memory access (MEM) ---
     // + Flip-Flop para pipe MEM
     always_ff @(posedge clk, posedge rst) begin
-        if (rst) begin 
+        if (rst | MEM_CLR) begin
             MEM_INSTR <= nop;
             MEM_RWB <= '0;
             MEM_ALUFlags <= '0;
@@ -299,7 +299,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     // + Unidad de administrador
     admin_unit #(.width(32)) _admin_unit (
         .clk(clk), .rst(rst),
-        .logout(MEM_Session[1]), .signal(MEM_ALUFlags[3]), .login(MEM_Session[0]),
+        .logout(MEM_Session[1]), .signal(MEM_ALUFlags[2]), .login(MEM_Session[0]),
         .tSes(lifetime), .tOut(timeout), .max(max),
         .session(Login)
     );
@@ -360,7 +360,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     end
 
     // + Seleccionar señales de salida
-    assign WB_DataOut = (WB_MemToReg[1]) ? ( (WB_MemToReg[0]) ? WB_PCplus4 : WB_MemOut) : ( (WB_MemToReg[0]) ? WB_ALUOut : WB_ALUOut);
+    assign WB_DataOut = (WB_MemToReg[1]) ? ( (WB_MemToReg[0]) ? WB_PCplus4 : WB_MemOut) : ( (WB_MemToReg[0]) ? WB_ALUOut : WB_VaultOut);
 
     // --- 6. Unidad de Riesgos (Hazard Unit) ---
     hazard_unit #(.INSTR_WIDTH(32)) _hazard_unit (
@@ -376,7 +376,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
         .StallIF(IF_EN), .FlushIF(IF_CLR),
         .StallID(ID_EN), .FlushID(ID_CLR),
         .StallEX(EX_EN), .FlushEX(EX_CLR),
-        .StallMEM(MEM_EN),
+        .StallMEM(MEM_EN), .FlushMEM(MEM_CLR),
         .StallWB(WB_EN),
         .RD1SrcEX(EX_Op1Sel), .RD2SrcEX(EX_Op2Sel), .RD3SrcEX(EX_Op3Sel),
         .RD1FwdEX(EX_Op1Fwd), .RD2FwdEX(EX_Op2Fwd), .RD3FwdEX(EX_Op3Fwd)

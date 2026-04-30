@@ -39,7 +39,7 @@ admin_unit = ${dirCONTROL}/admin_unit.sv ${dirCONTROL}/cycle_comparer.sv	# unida
 cond_unit = ${dirCONTROL}/cond_unit.sv	# unidad de condicionales y saltos (cambios al PC)
 ssu = ${dirCONTROL}/ssu.sv				# unidad de seleccion segura (instrucciones @)
 
-cpu = ${dirDATAPATH}/*.sv ${dirCONTROL}/*.sv ${dirINSTRMEM}/*.sv ${dirDATAMEM}/*.sv ${dirVAULT}/*.sv ${dirREGFILE}/*.sv ${dirSECMEM}/*.sv ${dirALU}/*.sv ${dirHAZARD}/*.sv # compilar todos los modulos del procesador
+cpu = ${dirDATAPATH}/*.sv ${dirCONTROL}/*.sv ${dirINSTRMEM}/*.sv ${dirDATAMEM}/*.sv ${dirVAULT}/*.sv ${dirREGFILE}/*.sv ${dirSECMEM}/*.sv ${dirALU}/*.sv ${dirHAZARD}/hazard_unit.sv # compilar todos los modulos del procesador
 
 #////////////////////////////////////////////////////////////////////////////////
 # --- Makefile ---
@@ -107,6 +107,10 @@ Datapath:
 run:
 	vvp ./output/sim.out
 	gtkwave ./output/wave.vcd
+
+run:
+	vvp ./output/sim.out
+	gtkwave ./output/$(TARGET).vcd ./output/$(TARGET).gtkw
 
 program_load:
 	python ./src/load_file.py --input ./input/$(TARGET) --output ./instrmem/instr_mem.hex --address 0x0
