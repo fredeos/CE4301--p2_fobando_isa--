@@ -1,6 +1,6 @@
 [*]
 [*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
-[*] Thu Apr 30 19:25:58 2026
+[*] Fri May 01 04:44:33 2026
 [*]
 [dumpfile] "B:\workbench\repos\CE4301--p2_fobando_isa--\output\output\wave.vcd"
 [savefile] "B:\workbench\repos\CE4301--p2_fobando_isa--\output\wave.gtkw"
@@ -19,15 +19,15 @@ tb_datapath.rst
 @420
 tb_datapath.cycle[31:0]
 @22
-[color] 5
-tb_datapath._cpu.EX_INSTR[31:0]
-[color] 3
-tb_datapath._cpu.ID_INSTR[31:0]
 [color] 1
 tb_datapath._cpu.IF_INSTR[31:0]
+[color] 3
+tb_datapath._cpu.ID_INSTR[31:0]
+[color] 5
+tb_datapath._cpu.EX_INSTR[31:0]
 [color] 7
 tb_datapath._cpu.MEM_INSTR[31:0]
-@c00023
+@c00022
 [color] 2
 tb_datapath._cpu.WB_INSTR[31:0]
 @28
@@ -63,7 +63,7 @@ tb_datapath._cpu.WB_INSTR[31:0]
 (29)tb_datapath._cpu.WB_INSTR[31:0]
 (30)tb_datapath._cpu.WB_INSTR[31:0]
 (31)tb_datapath._cpu.WB_INSTR[31:0]
-@1401201
+@1401200
 -group_end
 [pattern_trace] 1
 [pattern_trace] 0

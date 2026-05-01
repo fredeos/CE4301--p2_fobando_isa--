@@ -1,0 +1,10 @@
+00040486 // pmovi bx, 4
+FFE03882 // addi r0, zero, -2
+A9C1F022 // login 0xA9C1F
+00070C20 // send dx, r0
+00060D0E // stvh dx,+ 6(ax)
+00040C8C // ldvb dx,+ 4(ax)
+00072886 // paddi cx, bx, 7
+00035504 // pmul fx, cx, dx
+00053C60 // recv r1, fx
+00000062 // quit

@@ -50,7 +50,6 @@ always_comb begin
         if (opcode == 5'b00001) pcmod = 1'b1; // Tipo I
         if (opcode == 5'b00100) pcmod = 1'b1; // Tipo M (load)
         if (opcode == 5'b01001) pcmod = 1'b1; // Tipo J
-    end else if (rn == 5'b00011) begin
         if (opcode == 5'b10000 && func4 == 4'b0001) pcmod = 1'b1; // Tipo T (recv)
     end
 

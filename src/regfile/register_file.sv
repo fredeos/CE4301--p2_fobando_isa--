@@ -4,7 +4,7 @@ module register_file #(
     parameter int DEPTH      = 1 << ADDR_WIDTH
 )(
     input  logic clk,   // Reloj del sistema
-    input  logic reset, // Reset síncrono
+    input  logic rst_n, // Reset síncrono (activo en bajo)
     input  logic we,    // Enable de escritura
 
     input  logic [ADDR_WIDTH-1:0] ra1,   // Dirección de lectura 1
@@ -36,8 +36,8 @@ module register_file #(
     assign pc_out = (we && (wa == PC_REG)) ? wd : pc_in;
 
     // --- Logica secuencial (escritura) ---
-    always_ff @(posedge clk, posedge reset) begin
-        if (reset) begin
+    always_ff @(posedge clk, negedge rst_n) begin
+        if (!rst_n) begin
             // Limpia todos los registros internos
             for (i = 0; i < DEPTH; i = i + 1) begin
                 regfile_mem[i] <= '0;
@@ -64,7 +64,7 @@ module register_file #(
             LR_REG:    rd1 = lr_in;       // lr
             DELTA_REG: rd1 = DELTA_CONST; // delta
             MAX_REG:   rd1 = MAX_CONST;   // max
-            default: rd1 = (ra1 == wa) ? wd : regfile_mem[ra1];
+            default: rd1 = (we && (ra1 == wa)) ? wd : regfile_mem[ra1];
         endcase
 
         // Lectura del segundo operando
@@ -74,7 +74,7 @@ module register_file #(
             LR_REG:    rd2 = lr_in;       // lr
             DELTA_REG: rd2 = DELTA_CONST; // delta
             MAX_REG:   rd2 = MAX_CONST;   // max
-            default: rd2 = (ra2 == wa) ? wd : regfile_mem[ra2];
+            default: rd2 = (we && (ra2 == wa)) ? wd : regfile_mem[ra2];
         endcase
     end
 

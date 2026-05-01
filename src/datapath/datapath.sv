@@ -4,13 +4,11 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     localparam MEM_SIZE_KB = 64;
     // ########################################################################################################
     // --- Valores default del procesador ---
-    logic [31:0] nop, password, lifetime, timeout, max;
-
-    assign nop = 32'h00000080; // Valor por defecto para omitir instrucciones
-    assign password = 32'h000A9C1F; // Contraseña para accesos al hardware seguro
-    assign lifetime = 32'd5000; // tiempo de vida de session segura
-    assign timeout = 32'd10000; // tiempo de espera al acceder limit de intenos
-    assign max = 32'd4; // limite de intentos para iniciar session segura
+    localparam logic [31:0] nop = 32'h00000080; // Valor por defecto para omitir instrucciones
+    localparam logic [31:0] password = 32'h000A9C1F; // Contraseña para accesos al hardware seguro
+    localparam logic [31:0] lifetime = 32'd5000; // tiempo de vida de session segura
+    localparam logic [31:0] timeout = 32'd10000; // tiempo de espera al acceder limit de intenos
+    localparam logic [31:0] max = 32'd4; // limite de intentos para iniciar session segura
     
     // --- Señales de interconexion entre modulos y etapas ---
     // [PC select]
@@ -168,7 +166,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
 
     // + Banco de registros (Register File)
     register_file #(.DATA_WIDTH(32), .ADDR_WIDTH(5)) _register_file (
-        .clk(clk), .reset(rst),
+        .clk(clk), .rst_n(~rst),
         .we(WB_RegWrite[1]),
         .ra1(ID_Rn), .ra2(Rm),
         .wa(WB_RWB),
@@ -370,7 +368,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
         .WBInstr(WB_INSTR),
         .RD1PipeEX(EX_Op1), .RD2PipeEX(EX_Op2), .RD3PipeEX(EX_Op3),
         .ALUOut(MEM_ALUOut), .DataOutWB(WB_DataOut),
-        .branch_taken(MEM_PCSrc[0]),
+        .branch_taken(MEM_PCSrc[0] | MEM_PCSrc[1]),
         .mem_busy(1'b0),
         .wb_busy(1'b0),
         .StallIF(IF_EN), .FlushIF(IF_CLR),

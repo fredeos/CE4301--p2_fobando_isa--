@@ -108,9 +108,9 @@ run:
 	vvp ./output/sim.out
 	gtkwave ./output/wave.vcd
 
-run:
+run-config:
 	vvp ./output/sim.out
-	gtkwave ./output/$(TARGET).vcd ./output/$(TARGET).gtkw
+	gtkwave ./output/wave.vcd ./output/$(TARGET).gtkw
 
 program_load:
 	python ./src/load_file.py --input ./input/$(TARGET) --output ./instrmem/instr_mem.hex --address 0x0

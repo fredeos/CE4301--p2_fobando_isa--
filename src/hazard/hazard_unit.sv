@@ -45,7 +45,12 @@ module hazard_unit #(
     localparam logic [1:0] SRC_WB   = 2'b10;
 
     // Registro cero usado para ignorar dependencias falsas.
-    localparam logic [4:0] REG_ZERO = 5'd0;
+    localparam logic [4:0] REG_ZERO  = 5'd0;
+    localparam logic [4:0] LR_REG    = 5'd4;
+    localparam logic [4:0] DELTA_REG = 5'd30;
+    localparam logic [4:0] MAX_REG   = 5'd31;
+
+    localparam logic [2:0] AX_ZERO   = 3'd0;
 
     // Instrucciones nop invalida
     localparam logic [31:0] nop = 32'h00000080;
@@ -174,6 +179,10 @@ module hazard_unit #(
     logic [4:0]  wb_normal_dst;
     logic [2:0]  mem_secure_dst;
     logic [2:0]  wb_secure_dst;
+    logic        mem_normal_writeable_dst;
+    logic        mem_secure_writeable_dst;
+    logic        wb_normal_writeable_dst;
+    logic        wb_secure_writeable_dst;
 
     // Hazards load-use detectados entre ID y EX.
     logic        load_use_hazard;
@@ -324,6 +333,31 @@ module hazard_unit #(
         begin
             // Las cargas seguras producen el dato despues de EX.
             is_load_secure = valid && (opcode == OP_V_LD);
+        end
+    endfunction
+
+    function automatic logic has_normal_writeable_dst (
+        input logic [4:0] dest
+    );
+        begin 
+            case (dest)
+                REG_ZERO,
+                LR_REG,
+                DELTA_REG,
+                MAX_REG: has_normal_writeable_dst = 1'b0;
+                default: has_normal_writeable_dst = 1'b1;
+            endcase
+        end
+    endfunction
+
+    function automatic logic has_secure_writeable_dst (
+        input logic [2:0] dest
+    );
+        begin 
+            case (dest)
+                AX_ZERO: has_secure_writeable_dst = 1'b0;
+                default: has_secure_writeable_dst = 1'b1;
+            endcase
         end
     endfunction
 
@@ -510,6 +544,11 @@ module hazard_unit #(
     assign mem_secure_dst = secure_dst_reg(mem_opcode, mem_sd);
     assign wb_secure_dst  = secure_dst_reg(wb_opcode, wb_sd);
 
+    assign mem_normal_writeable_dst = has_normal_writeable_dst(mem_normal_dst);
+    assign mem_secure_writeable_dst = has_secure_writeable_dst(mem_secure_dst);
+    assign wb_normal_writeable_dst = has_normal_writeable_dst(wb_normal_dst);
+    assign wb_secure_writeable_dst = has_secure_writeable_dst(wb_secure_dst);
+
     // Detecta load-use cuando ID necesita el destino normal que aun esta en EX.
     assign load_use_hazard =
         is_load_normal(ex_valid, ex_opcode) &&
@@ -593,7 +632,7 @@ module hazard_unit #(
 
         // MEM tiene prioridad sobre WB para forwarding normal, pero solo
         // cuando ALUOut ya representa el dato final adelantable.
-        if (mem_can_forward_normal && (mem_normal_dst != REG_ZERO)) begin
+        if (mem_can_forward_normal && mem_normal_writeable_dst) begin
             if (ex_nsrc1_valid && (mem_normal_dst == ex_nsrc1)) begin
                 RD1SrcEX = SRC_ALU;
             end
@@ -603,7 +642,7 @@ module hazard_unit #(
         end
 
         // WB se usa solo si MEM no cubrio la dependencia normal.
-        if (wb_writes_normal && (wb_normal_dst != REG_ZERO)) begin
+        if (wb_writes_normal && wb_normal_writeable_dst) begin
             if (ex_nsrc1_valid && (wb_normal_dst == ex_nsrc1) && (RD1SrcEX == SRC_PIPE)) begin
                 RD1SrcEX = SRC_WB;
             end
@@ -614,7 +653,7 @@ module hazard_unit #(
 
         // MEM tiene prioridad sobre WB para forwarding seguro bajo la misma
         // regla: ALUOut debe contener el valor final y no una direccion.
-        if (mem_can_forward_secure) begin
+        if (mem_can_forward_secure && mem_secure_writeable_dst) begin
             if (ex_ssrc1_valid && (mem_secure_dst == ex_ssrc1)) begin
                 RD1SrcEX = SRC_ALU;
             end
@@ -627,7 +666,7 @@ module hazard_unit #(
         end
 
         // WB se usa solo si MEM no cubrio la dependencia segura.
-        if (wb_writes_secure) begin
+        if (wb_writes_secure && wb_secure_writeable_dst) begin
             if (ex_ssrc1_valid && (wb_secure_dst == ex_ssrc1) && (RD1SrcEX == SRC_PIPE)) begin
                 RD1SrcEX = SRC_WB;
             end
@@ -689,6 +728,13 @@ module hazard_unit #(
             StallIF = 1'b1;
             StallID = 1'b1;
             FlushEX = 1'b1;
+        end else if (mem_session) begin
+            // Si hay una instruccion S en el pipeline se debe detener el ingreso de
+            // de nuevas instrucciones hasta que se determine si fue exitoso o no
+            StallIF = 1'b1;
+            StallID = 1'b1;
+            StallEX = 1'b1;
+            FlushMEM = 1'b1;
         end else if (load_use_hazard || secure_load_use_hazard) begin
             StallIF = 1'b1;
             StallID = 1'b1;
