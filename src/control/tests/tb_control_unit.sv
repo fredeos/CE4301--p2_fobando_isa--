@@ -7,7 +7,7 @@ module tb_control_unit ();
     logic [4:0] Branch, ALUControl;
     logic [2:0] ImmSel;
     logic [1:0] MemToReg, RegWrite, MemWrite, Session, ALUSrcA, RSel;
-    logic JalSel, ALUOut, ALUSrcB, RegSrc, SecSrc;
+    logic ALUSel, ALUSrcB, RegSrc, SecSrc;
 
     logic clk;
     always #5 clk = ~clk;
@@ -19,9 +19,9 @@ module tb_control_unit ();
         .MemToReg(MemToReg),
         .RegWrite(RegWrite),
         .MemWrite(MemWrite), .MemBytes(MemBytes),
-        .JalSel(JalSel), .Branch(Branch),
+        .Branch(Branch),
         .Session(Session),
-        .ALUOut(ALUOut), .ALUControl(ALUControl), .ALUSrcB(ALUSrcB), .ALUSrcA(ALUSrcA), 
+        .ALUSel(ALUSel), .ALUControl(ALUControl), .ALUSrcB(ALUSrcB), .ALUSrcA(ALUSrcA), 
         .RSel(RSel),
         .ImmSel(ImmSel),
         .RegSrc(RegSrc),
@@ -38,10 +38,10 @@ module tb_control_unit ();
         instructions[0] = 32'h00000080; // nop
         instructions[1] = 32'h01181480; // add p0, r2, r3
         instructions[2] = 32'h00708d03; // @muli pc, ra, 7
-        instructions[3] = 32'hff59f110; // bge r5, r7, -4
-        instructions[4] = 32'h003138c8; // ldb r0,- 3(sp) ldw rd, +- -4(rn)
+        instructions[3] = 32'hff59f110; // blt r5, r7, -4
+        instructions[4] = 32'h003138c8; // ldb r0,- 3(sp)
         instructions[5] = 32'h00414e0a; // stw r5,+ 4(sp)
-        instructions[6] = 32'h00000512; // jal ra, 11
+        instructions[6] = 32'h000006d2; // jal ra, 11
         instructions[7] = 32'hbeef0022; // login 0xBEEF0
         instructions[8] = 32'h00000062; // quit
         instructions[9] = 32'h00022144; // pdiv  ax, bx, cx
@@ -57,16 +57,15 @@ module tb_control_unit ();
         for (int i = 0; i < N; i++) begin
             instr = instructions[i];
             #10;
-            $display("-----------------------[INSTR[%d]:0x%h]-----------------------", i, instr);
+            $display("-----------------------[INSTR[%0d]:0x%h]-----------------------", i, instr);
             $display("MemToReg(WB mux) = %b", MemToReg);
             $display("RegFile WE = %b", RegWrite[1]);
             $display("SecMem WE = %b", RegWrite[0]);
             $display("Data Memory: WE = %b, Bytes = %b", MemWrite[1], MemBytes[7:4]);
             $display("Vault: WE = %b, Bytes = %b", MemWrite[0], MemBytes[3:0]);
-            $display("JalSel WB (PC+4 mux) = %b", JalSel);
             $display("Branch: cond = %b, pcmod = %b, binstr = %b", Branch[4:2], Branch[1], Branch[0]);
             $display("Session: login = %b, logout = %b", Session[0], Session[1]);
-            $display("ALU selection: %b", ALUOut);
+            $display("ALU selection: %b", ALUSel);
             $display("Primary ALU operation: %b", ALUControl[3:0]);
             $display("Secondary ALU operation: %b", ALUControl[4]);
             $display("ALUSrcA = %b, ALUSrcB = %b", ALUSrcA, ALUSrcB);

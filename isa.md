@@ -21,16 +21,16 @@
 
 |addr|nombre|descripcion|
 |----|------|-----------|
-|0   | <code>zero</code> | 0x0 (<i>read-only</i>) |
+|0   | <code>zero</code> | 0x0 (*read-only*) |
 |1   | <code>ra</code>   | return address |
 |2   | <code>sp</code>   | stack pointer |
 |3   | <code>pc</code>   | program counter |
-|4   | <code>lr</code>   | login register (<i>read-only</i>) |
+|4   | <code>lr</code>   | login register (*read-only*) |
 |5   | <code>p0</code>   | argumento y retorno de funcion|
 |6   | <code>p1</code>-<code>p8</code>   | argumentos de funcion |
 |14  | <code>r0</code>-<code>r15</code>| proposito general |
-|30  | <code>delta</code> | 0x9e3779b9 (<i>read-only</i>) |
-|31  | <code>max</code>   | 0xFFFFFFFF (<i>read-only</i>) |
+|30  | <code>delta</code> | 0x9e3779b9 (*read-only*) |
+|31  | <code>max</code>   | 0xFFFFFFFF (*read-only*) |
 
 ### Banco seguro de registros
 
@@ -39,7 +39,7 @@
 
 |addr|nombre|descripcion|
 |----|------|-----------|
-|0   |  <code>ax</code> | proposito general |
+|0   |  <code>ax</code> | 0x0 (*read-only*) |
 |1   |  <code>bx</code> | proposito general |
 |2   |  <code>cx</code> | proposito general |
 |3   |  <code>dx</code> | proposito general |
@@ -149,7 +149,7 @@
 **NOTAS**:
 
 - Las notaciones $R[...]$, $M[...]$, $S[...]$, $V[...]$ significan accesos a registros, memoria, registros seguros y boveda, respectivamente.
-- En las instrucciones **J** y **B** el valor del inmediato representa la distancia de salto hacia una instruccion con un *label* (generalmente calculada por el compilador). Esta se calcula $imm = instr[j] - instr[i] $; donde $i$ representa el indice de la instruccion actual y $j$ representa el indice de la instruccion hacia donde se desea saltar.
+- En las instrucciones **J** y **B** el valor del inmediato representa la distancia de salto hacia una instruccion con un *label* (generalmente calculada por el compilador). Esta se calcula $imm = instr[j] - instr[i] $; donde $i$ representa el indice de la sigueinte instruccion a la actual (PC+4) y $j$ representa el indice de la instruccion hacia donde se desea saltar.
 - Las instrucciones de tipo **PR** permiten múltiples combinaciones para la selección de operaciones, para esto refierase a las tablas de encodificación para operaciones de ALU primaria y secundaria
 
 **TIPOS DE INSTRUCCIONES**:
@@ -348,12 +348,12 @@
 
 | cond  | comparacion |
 |-------|-------------|
-| 0000  | `BEQ`($==$) |
-| 0001  | `BNE`($!=$) |
-| 0010  | `BGT`($>$)  |
-| 0011  | `BLT`($<$)  |
-| 0100  | `BGE`($>=$) |
-| 0101  | `BLE`($<=$) |
+| 0001  | `BEQ`($==$) |
+| 0010  | `BNE`($!=$) |
+| 0011  | `BGT`($>$)  |
+| 0100  | `BLT`($<$)  |
+| 0101  | `BGE`($>=$) |
+| 0110  | `BLE`($<=$) |
 
 ### Convención de para definicion de funciones
 Para definir y hacer llamadas a funciones en programas de ensamblador, se deben utilizar llamadas a funciones utilizando `call`, además cada función debe cumplir con la convención de uso y guardado de registros para garantizar la integridad de los datos entre llamadas. Para este efecto se manipula el stack para almacenar registros en memoria al inicio de una llamada y restaurarlos al finalizar la función. El convenio de registros establecido asigna los registros `p0-p8` para argumentos y retorno de funciones, `r0-r15` para uso general, `ra` para direcciones de retorno y `sp` para puntero del stack en memoria.

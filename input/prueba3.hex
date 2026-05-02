@@ -1,0 +1,8 @@
+00C03888 // ldb r0,+ 12(zero)
+00503C82 // movi r1, 5
+FFE04082 // movi r2, -2
+00001022 // login 0x00001
+00024480 // mov r3, lr
+00F74081 // @add r2, r0, r1
+00000062 // quit
+0040420A // stw r2,+ 4(zero)

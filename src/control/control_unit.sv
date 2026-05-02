@@ -10,12 +10,11 @@ module control_unit (
     output logic  [1:0] MemWrite, // write enable = [0]: vault, [1]: data memory
     output logic  [7:0] MemBytes, // seleccion de bytes para lectura o escritura = [3:0] vault, [7:4] data memory
     // Señales de control saltos y branch
-    output logic        JalSel,   // seleccion de PC+4 para instrucciones J
     output logic  [4:0] Branch,   // condiciones de salto para instrucciones J, B
     // Señales de control de session
     output logic  [1:0] Session,  // [0]: login, [1]: logout (quit)
     // Señales de control para EX
-    output logic        ALUOut,    // salida de ALU (pALU | sALU)
+    output logic        ALUSel,    // salida de ALU (pALU | sALU)
     output logic  [4:0] ALUControl,// operaciones de ALU = [3:0]: pALU, [4]: sALU
     output logic        ALUSrcB,   // selección de operando B para pALU
     output logic  [1:0] ALUSrcA,   // selección de operando A para pALU
@@ -50,9 +49,8 @@ module control_unit (
         .MemToReg(MemToReg),
         .RegWrite(RegWrite),
         .MemWrite(MemWrite), .MemBytes(MemBytes),
-        .JalSel(JalSel),
         .Session(Session),
-        .ALUOut(ALUOut), .ALUSrcB(ALUSrcB), .ALUSrcA(ALUSrcA),
+        .ALUSel(ALUSel), .ALUSrcB(ALUSrcB), .ALUSrcA(ALUSrcA),
         .RSel(RSel),
         .ImmSel(ImmSel),
         .RegSrc(RegSrc),

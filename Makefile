@@ -27,6 +27,10 @@ dirALUtb = ${dirALU}/tests
 dirHAZARD = ./src/hazard
 dirHAZARDtb = ${dirHAZARD}/tests
 
+# --- Directorio del datapath y extension de inmediatos ---
+dirDATAPATH = ./src/datapath
+dirDATAPATHtb = ${dirDATAPATH}/tests
+
 #////////////////////////////////////////////////////////////////////////////////
 # --- Archivos de codigo fuente para ejecutar pruebas ---
 
@@ -34,6 +38,8 @@ control_unit = ${dirCONTROL}/control_unit.sv ${dirCONTROL}/branch_decoder.sv ${d
 admin_unit = ${dirCONTROL}/admin_unit.sv ${dirCONTROL}/cycle_comparer.sv	# unidad de administrador (sessiones de hardware seguro)
 cond_unit = ${dirCONTROL}/cond_unit.sv	# unidad de condicionales y saltos (cambios al PC)
 ssu = ${dirCONTROL}/ssu.sv				# unidad de seleccion segura (instrucciones @)
+
+cpu = ${dirDATAPATH}/*.sv ${dirCONTROL}/*.sv ${dirINSTRMEM}/*.sv ${dirDATAMEM}/*.sv ${dirVAULT}/*.sv ${dirREGFILE}/*.sv ${dirSECMEM}/*.sv ${dirALU}/*.sv ${dirHAZARD}/hazard_unit.sv # compilar todos los modulos del procesador
 
 #////////////////////////////////////////////////////////////////////////////////
 # --- Makefile ---
@@ -89,9 +95,25 @@ sALU:
 	mkdir -p ./output
 	iverilog -g2012 -o ./output/sim.out ${dirALU}/sALU.sv ${dirALUtb}/sALU_tb.sv
 
+ImmExt:
+	mkdir -p ./output
+	iverilog -g2012 -o ./output/sim.out ${dirDATAPATH}/imm_ext32.sv ${dirDATAPATHtb}/tb_imm_ext.sv
+
+Datapath:
+	mkdir -p ./output
+	iverilog -g2012 -o ./output/sim.out ${cpu} ${dirDATAPATHtb}/tb_datapath.sv
+
+
 run:
 	vvp ./output/sim.out
 	gtkwave ./output/wave.vcd
+
+run-config:
+	vvp ./output/sim.out
+	gtkwave ./output/wave.vcd ./output/$(TARGET).gtkw
+
+program_load:
+	python ./src/load_file.py --input ./input/$(TARGET) --output ./instrmem/instr_mem.hex --address 0x0
 
 clean:
 	rm ./output/**

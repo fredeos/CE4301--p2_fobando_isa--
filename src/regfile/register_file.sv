@@ -4,7 +4,7 @@ module register_file #(
     parameter int DEPTH      = 1 << ADDR_WIDTH
 )(
     input  logic clk,   // Reloj del sistema
-    input  logic reset, // Reset síncrono
+    input  logic rst_n, // Reset síncrono (activo en bajo)
     input  logic we,    // Enable de escritura
 
     input  logic [ADDR_WIDTH-1:0] ra1,   // Dirección de lectura 1
@@ -13,6 +13,7 @@ module register_file #(
 
     input  logic [DATA_WIDTH-1:0] wd,    // Dato de escritura
     input  logic [DATA_WIDTH-1:0] pc_in, // Valor actual del PC
+    input  logic [DATA_WIDTH-1:0] lr_in, // Valor actual del LR
 
     output logic [DATA_WIDTH-1:0] rd1,   // Dato leído 1
     output logic [DATA_WIDTH-1:0] rd2,   // Dato leído 2
@@ -31,8 +32,12 @@ module register_file #(
     localparam logic [DATA_WIDTH-1:0] DELTA_CONST   = 32'h9E3779B9; // Constante TEA
     localparam logic [DATA_WIDTH-1:0] MAX_CONST     = 32'hFFFFFFFF; // Constante fija
 
-    always_ff @(posedge clk) begin
-        if (reset) begin
+    // --- Asignacion directa de registros ---
+    assign pc_out = (we && (wa == PC_REG)) ? wd : pc_in;
+
+    // --- Logica secuencial (escritura) ---
+    always_ff @(posedge clk, negedge rst_n) begin
+        if (!rst_n) begin
             // Limpia todos los registros internos
             for (i = 0; i < DEPTH; i = i + 1) begin
                 regfile_mem[i] <= '0;
@@ -50,28 +55,27 @@ module register_file #(
         end
     end
 
+    // --- Logica combinacional (lectura) ---
     always_comb begin
         // Lectura del primer operando
-        unique case (ra1)
+        case (ra1)
             ZERO_REG:  rd1 = '0;          // zero
-            PC_REG:    rd1 = pc_in;       // pc
-            LR_REG:    rd1 = regfile_mem[LR_REG]; // lr
+            PC_REG:    rd1 = pc_out;      // pc
+            LR_REG:    rd1 = lr_in;       // lr
             DELTA_REG: rd1 = DELTA_CONST; // delta
             MAX_REG:   rd1 = MAX_CONST;   // max
-            default: rd1 = regfile_mem[ra1];
+            default: rd1 = (we && (ra1 == wa)) ? wd : regfile_mem[ra1];
         endcase
 
         // Lectura del segundo operando
-        unique case (ra2)
+        case (ra2)
             ZERO_REG:  rd2 = '0;          // zero
-            PC_REG:    rd2 = pc_in;       // pc
-            LR_REG:    rd2 = regfile_mem[LR_REG]; // lr
+            PC_REG:    rd2 = pc_out;      // pc
+            LR_REG:    rd2 = lr_in;       // lr
             DELTA_REG: rd2 = DELTA_CONST; // delta
             MAX_REG:   rd2 = MAX_CONST;   // max
-            default: rd2 = regfile_mem[ra2];
+            default: rd2 = (we && (ra2 == wa)) ? wd : regfile_mem[ra2];
         endcase
     end
-
-    assign pc_out = pc_in; // Refleja el PC externo
 
 endmodule

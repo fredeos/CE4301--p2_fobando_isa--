@@ -1,0 +1,69 @@
+[*]
+[*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
+[*] Fri May 01 04:44:33 2026
+[*]
+[dumpfile] "B:\workbench\repos\CE4301--p2_fobando_isa--\output\output\wave.vcd"
+[savefile] "B:\workbench\repos\CE4301--p2_fobando_isa--\output\wave.gtkw"
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*-34.000000 6780000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb_datapath.
+[sst_width] 197
+[signals_width] 221
+[sst_expanded] 1
+[sst_vpaned_height] 153
+@28
+tb_datapath.clk
+tb_datapath.rst
+@420
+tb_datapath.cycle[31:0]
+@22
+[color] 1
+tb_datapath._cpu.IF_INSTR[31:0]
+[color] 3
+tb_datapath._cpu.ID_INSTR[31:0]
+[color] 5
+tb_datapath._cpu.EX_INSTR[31:0]
+[color] 7
+tb_datapath._cpu.MEM_INSTR[31:0]
+@c00022
+[color] 2
+tb_datapath._cpu.WB_INSTR[31:0]
+@28
+(0)tb_datapath._cpu.WB_INSTR[31:0]
+(1)tb_datapath._cpu.WB_INSTR[31:0]
+(2)tb_datapath._cpu.WB_INSTR[31:0]
+(3)tb_datapath._cpu.WB_INSTR[31:0]
+(4)tb_datapath._cpu.WB_INSTR[31:0]
+(5)tb_datapath._cpu.WB_INSTR[31:0]
+(6)tb_datapath._cpu.WB_INSTR[31:0]
+(7)tb_datapath._cpu.WB_INSTR[31:0]
+(8)tb_datapath._cpu.WB_INSTR[31:0]
+(9)tb_datapath._cpu.WB_INSTR[31:0]
+(10)tb_datapath._cpu.WB_INSTR[31:0]
+(11)tb_datapath._cpu.WB_INSTR[31:0]
+(12)tb_datapath._cpu.WB_INSTR[31:0]
+(13)tb_datapath._cpu.WB_INSTR[31:0]
+(14)tb_datapath._cpu.WB_INSTR[31:0]
+(15)tb_datapath._cpu.WB_INSTR[31:0]
+(16)tb_datapath._cpu.WB_INSTR[31:0]
+(17)tb_datapath._cpu.WB_INSTR[31:0]
+(18)tb_datapath._cpu.WB_INSTR[31:0]
+(19)tb_datapath._cpu.WB_INSTR[31:0]
+(20)tb_datapath._cpu.WB_INSTR[31:0]
+(21)tb_datapath._cpu.WB_INSTR[31:0]
+(22)tb_datapath._cpu.WB_INSTR[31:0]
+(23)tb_datapath._cpu.WB_INSTR[31:0]
+(24)tb_datapath._cpu.WB_INSTR[31:0]
+(25)tb_datapath._cpu.WB_INSTR[31:0]
+(26)tb_datapath._cpu.WB_INSTR[31:0]
+(27)tb_datapath._cpu.WB_INSTR[31:0]
+(28)tb_datapath._cpu.WB_INSTR[31:0]
+(29)tb_datapath._cpu.WB_INSTR[31:0]
+(30)tb_datapath._cpu.WB_INSTR[31:0]
+(31)tb_datapath._cpu.WB_INSTR[31:0]
+@1401200
+-group_end
+[pattern_trace] 1
+[pattern_trace] 0

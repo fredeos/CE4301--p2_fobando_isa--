@@ -8,12 +8,10 @@ module main_decoder (
     // Señales de control en MEM
     output logic  [1:0] MemWrite, // write enable = [0]: vault, [1]: data memory
     output logic  [7:0] MemBytes, // seleccion de bytes para lectura o escritura = [3:0] vault, [7:4] data memory
-    // Señales de control saltos y branch
-    output logic        JalSel,   // seleccion de PC+4 para instrucciones J
     // Señales de control de session
     output logic  [1:0] Session,  // [0]: login, [1]: logout (quit)
     // Señales de control para EX
-    output logic        ALUOut,    // salida de ALU (pALU | sALU)
+    output logic        ALUSel,    // salida de ALU (pALU | sALU)
     output logic        ALUSrcB,   // selección de operando B para pALU
     output logic  [1:0] ALUSrcA,   // selección de operando A para pALU
     // Señales de control para ID
@@ -81,7 +79,7 @@ always_comb begin
         end
 
         5'b01001: begin // Tipo J/F
-            control = 27'b0110_00_00000000_00_1010_1100_011;
+            control = 27'b1110_00_00000000_00_1010_1100_011;
         end
 
         5'b10000: begin // Tipo T
@@ -100,11 +98,8 @@ always_comb begin
             control = 27'b0000_00_00000000_00_0000_0000_000;
         end
     endcase
-
-    // 2. Identificar instrucciones JAL
-    JalSel = (opcode == 5'b01001);
 end
 
-assign {MemToReg, RegWrite, MemWrite, MemBytes, Session, ALUOut, ALUSrcB, ALUSrcA, RSel, RegSrc, SecSrc, ImmSel} = control;
+assign {MemToReg, RegWrite, MemWrite, MemBytes, Session, ALUSel, ALUSrcB, ALUSrcA, RSel, RegSrc, SecSrc, ImmSel} = control;
 
 endmodule
