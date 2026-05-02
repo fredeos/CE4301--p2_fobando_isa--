@@ -1,12 +1,12 @@
 module tb_admin_unit ();
     localparam W = 8;
 
-    logic clk, rst, logout, login, zero, session;
+    logic clk, rst, logout, login, zero, session, refresh;
     logic [W-1:0] lifetime, timeout, maxAttempts;
 
     admin_unit #(.width(8)) _admin_unit (
         .clk(clk), .rst(rst),
-        .logout(logout), .signal(zero), .login(login),
+        .logout(logout), .signal(zero), .login(login), .refresh(refresh),
         .tSes(lifetime), .tOut(timeout), .max(maxAttempts),
         .session(session)
     );
@@ -23,6 +23,7 @@ module tb_admin_unit ();
         maxAttempts = 8'd3;
         login = 0;
         logout = 0;
+        refresh = 0;
         zero = 0;
         clk = 0;
         rst = 1;
@@ -39,7 +40,7 @@ module tb_admin_unit ();
             else zero = 0; // Contrasena incorrecta
             #10;
             if (session) $display("Inicio de session exitoso");
-            else $display("Inicio de session fallado");
+            else $display("Inicio de session fallado (%0d)", i);
         end
 
         // 2. Contar tiempo de espera (contrasena correcta)
@@ -49,16 +50,18 @@ module tb_admin_unit ();
         for (int i = 0; i < 11; i++) begin
             #10;
             if (session) $display("Inicio de session exitoso");
-            else $display("Inicio de session fallado (%d)", i);
+            else $display("Inicio de session fallado (%0d)", i);
         end
 
         // 3. Tiempo de vida maximo de la sesion
         login = 0; // 'ejecutando' otras instrucciones
         zero = 0; 
         $display("--------------------------[Tiempo de vida de una session activa]--------------------------");
-        for (int i = 0; i < 6; i++) begin 
+        for (int i = 0; i < 11; i++) begin
+            if (i == 4) refresh = 1; // refrescar session
+            else refresh = 0;
             #10;
-            if (session) $display("Session de admin activa (%d)", i);
+            if (session) $display("Session de admin activa (%0d)", i);
             else $display("Session finalizada");
         end
 
