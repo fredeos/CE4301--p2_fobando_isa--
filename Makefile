@@ -103,7 +103,6 @@ Datapath:
 	mkdir -p ./output
 	iverilog -g2012 -o ./output/sim.out ${cpu} ${dirDATAPATHtb}/tb_datapath.sv
 
-
 run:
 	vvp ./output/sim.out
 	gtkwave ./output/wave.vcd

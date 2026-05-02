@@ -3,7 +3,7 @@
 module tb_datapath ();
     logic clk, rst;
 
-    localparam cycles = 500;
+    localparam cycles = 1000;
     logic [31:0] cycle;
 
     always #5 clk = ~clk;

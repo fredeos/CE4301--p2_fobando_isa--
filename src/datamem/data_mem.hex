@@ -2,7 +2,7 @@
 // Direccion 0x00: Bytes ordenados para probar LB/LH
 000000F1
 // Direccion 0x04: Valores tipicos de headers
-00000000
+00000FFF
 // Direccion 0x08: Patrones de bits alternados
 00000000
 // Direccion 0x0C: Valores maximos
