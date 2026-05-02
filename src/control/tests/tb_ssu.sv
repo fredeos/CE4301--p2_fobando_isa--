@@ -4,13 +4,14 @@ module tb_ssu ();
     logic [31:0] instructions [N-1:0];
     logic [31:0] instr;
 
-    logic login, P, ignore;
+    logic login, P, ignore, is_secure;
     logic [4:0] opcode;
 
     ssu _ssu (
         .login(login), .P(P),
         .opcode(opcode),
-        .ignore(ignore)
+        .ignore(ignore),
+        .is_secure(is_secure)
     );
 
     initial begin 
@@ -44,6 +45,9 @@ module tb_ssu ();
 
                 if (ignore) $display("Omitir? Si");
                 else $display("Omitir? No");
+
+                if(is_secure) $display("Requiere hardware seguro? Si");
+                else $display("Requiere hardware seguro? No");
             end
         end
 

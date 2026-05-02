@@ -6,8 +6,8 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     // --- Valores default del procesador ---
     localparam logic [31:0] nop = 32'h00000080; // Valor por defecto para omitir instrucciones
     localparam logic [31:0] password = 32'h000A9C1F; // Contraseña para accesos al hardware seguro
-    localparam logic [31:0] lifetime = 32'd5000; // tiempo de vida de session segura
-    localparam logic [31:0] timeout = 32'd10000; // tiempo de espera al acceder limit de intenos
+    localparam logic [31:0] lifetime = 32'd35;   // tiempo de vida (en ciclos) de session segura entre instrucciones para hardware seguro
+    localparam logic [31:0] timeout = 32'd10000; // tiempo de espera (en ciclos) al exceder la cantidad de intenos de inicio de session
     localparam logic [31:0] max = 32'd4; // limite de intentos para iniciar session segura
     
     // --- Señales de interconexion entre modulos y etapas ---
@@ -21,7 +21,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     logic [31:0] INSTR, IF_INSTR;
     logic [31:0] IF_PC, IF_PCplus4;
     // + Señales de control
-    logic Login, Ignore;
+    logic Login, Ignore, IF_LoginRefresh;
     // + Señales de riesgos
     logic IF_EN, IF_CLR;
 
@@ -37,7 +37,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     logic [7:0] ID_MemBytes;
     logic [4:0] ID_Branch, ID_ALUControl;
     logic [2:0] ID_ImmSel;
-    logic ID_ALUSel, ID_ALUSrcB, ID_RegSrc, ID_SecSrc;
+    logic ID_ALUSel, ID_ALUSrcB, ID_RegSrc, ID_SecSrc, ID_LoginRefresh;
     // + Señales de riesgos
     logic ID_EN, ID_CLR;
 
@@ -53,7 +53,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     logic [1:0] EX_MemToReg, EX_RegWrite, EX_MemWrite, EX_Session, EX_ALUSrcA;
     logic [7:0] EX_MemBytes;
     logic [4:0] EX_Branch, EX_ALUControl;
-    logic EX_ALUSel, EX_ALUSrcB;
+    logic EX_ALUSel, EX_ALUSrcB, EX_LoginRefresh;
     // + Señales del hazard unit
     logic [1:0]  EX_Op1Sel, EX_Op2Sel, EX_Op3Sel;
     logic [31:0] EX_Op1Fwd, EX_Op2Fwd, EX_Op3Fwd;
@@ -71,6 +71,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     logic [1:0] MEM_MemToReg, MEM_RegWrite, MEM_MemWrite, MEM_Session;
     logic [7:0] MEM_MemBytes;
     logic [4:0] MEM_Branch;
+    logic MEM_LoginRefresh;
     // + Señales de riesgos
     logic MEM_EN, MEM_CLR;
 
@@ -107,7 +108,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     ssu _ssu (
         .login(Login), .P(INSTR[0]),
         .opcode(INSTR[5:1]),
-        .ignore(Ignore)
+        .ignore(Ignore), .is_secure(IF_LoginRefresh)
     );
 
     assign IF_INSTR = (Ignore) ? nop : INSTR;
@@ -118,9 +119,11 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
         if (rst | ID_CLR) begin 
             ID_INSTR <= nop;
             ID_PCplus4 <= '0;
+            ID_LoginRefresh <= '0;
         end else if (~ID_EN) begin 
             ID_INSTR <= IF_INSTR;
             ID_PCplus4 <= IF_PCplus4;
+            ID_LoginRefresh <= IF_LoginRefresh;
         end
     end
 
@@ -207,6 +210,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
             EX_MemBytes <= '0;
             EX_RegWrite <= '0;
             EX_MemToReg <= '0;
+            EX_LoginRefresh <= '0;
         end else if (~EX_EN) begin 
             EX_INSTR <= ID_INSTR;
             EX_PCplus4 <= ID_PCplus4;
@@ -226,6 +230,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
             EX_MemBytes <= ID_MemBytes;
             EX_RegWrite <= ID_RegWrite;
             EX_MemToReg <= ID_MemToReg;
+            EX_LoginRefresh <= ID_LoginRefresh;
         end
     end
 
@@ -276,6 +281,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
             MEM_MemBytes <= '0;
             MEM_RegWrite <= '0;
             MEM_MemToReg <= '0;
+            MEM_LoginRefresh <= '0;
         end else if (~MEM_EN) begin
             MEM_INSTR <= EX_INSTR;
             MEM_RWB <= EX_RWB;
@@ -291,6 +297,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
             MEM_MemBytes <= EX_MemBytes;
             MEM_RegWrite <= EX_RegWrite;
             MEM_MemToReg <= EX_MemToReg;
+            MEM_LoginRefresh <= EX_LoginRefresh;
         end
     end
 
@@ -298,6 +305,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     admin_unit #(.width(32)) _admin_unit (
         .clk(clk), .rst(rst),
         .logout(MEM_Session[1]), .signal(MEM_ALUFlags[2]), .login(MEM_Session[0]),
+        .refresh(MEM_LoginRefresh),
         .tSes(lifetime), .tOut(timeout), .max(max),
         .session(Login)
     );
