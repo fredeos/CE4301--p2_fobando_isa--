@@ -59,9 +59,9 @@
 |**R**| <code>mul rd, rn, rm</code> | $R[rd] \leftarrow R[rn] * R[rm]$ |
 |**R**| <code>div rd, rn, rm</code> | $R[rd] \leftarrow R[rn]  \div R[rm]$ |
 |**R**| <code>mod rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \%\ R[rm]$ |
-|**R**| <code>and rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \& \ R[rm]$ |
-|**R**| <code>orr rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \|\ R[rm]$ |
-|**R**| <code>xor rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \^\ \ R[rm]$ |
+|**R**| <code>and rd, rn, rm</code> | $R[rd] \leftarrow R[rn]$ & $R[rm]$ |
+|**R**| <code>orr rd, rn, rm</code> | $R[rd] \leftarrow R[rn]$ \| $R[rm]$ |
+|**R**| <code>xor rd, rn, rm</code> | $R[rd] \leftarrow R[rn]$ ^ $R[rm]$ |
 |**R**| <code>sll rd, rn, rm</code> | $R[rd] \leftarrow R[rn] << R[rm]$ |
 |**R**| <code>srl rd, rn, rm</code> | $R[rd] \leftarrow R[rn] >> R[rm]$ |
 |**R**| <code>mov rd, rn </code> | $R[rd] \leftarrow R[rn]$ |
@@ -71,9 +71,9 @@
 |**I**| <code>muli rd, rn, rm</code> | $R[rd] \leftarrow R[rn] * imm$ |
 |**I**| <code>divi rd, rn, rm</code> | $R[rd] \leftarrow R[rn] \div imm$ |
 |**I**| <code>modi rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \%\ imm$ |
-|**I**| <code>andi rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \& \ imm$ |
-|**I**| <code>orri rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \|\ imm$ |
-|**I**| <code>xori rd, rn, rm</code> | $R[rd] \leftarrow R[rn]\ \^\ \ imm$ |
+|**I**| <code>andi rd, rn, rm</code> | $R[rd] \leftarrow R[rn]$ &  $imm$ |
+|**I**| <code>orri rd, rn, rm</code> | $R[rd] \leftarrow R[rn]$ \| $imm$ |
+|**I**| <code>xori rd, rn, rm</code> | $R[rd] \leftarrow R[rn]$ ^  $imm$ |
 |**I**| <code>slli rd, rn, rm</code> | $R[rd] \leftarrow R[rn] << imm$ |
 |**I**| <code>srli rd, rn, rm</code> | $R[rd] \leftarrow R[rn] >> imm$ |
 |**I**| <code>movi rd, imm </code> | $R[rd] \leftarrow imm$ |
@@ -109,9 +109,9 @@
 |**PR**| <code>pmul sd, sn, sm</code> | $S[sd] \leftarrow S[sn] * S[sm]$ |
 |**PR**| <code>pdiv sd, sn, sm</code> | $S[sd] \leftarrow S[sn] \div S[sm]$ |
 |**PR**| <code>pmod sd, sn, sm</code> | $S[sd] \leftarrow S[sn]\ \%\ S[sm]$ |
-|**PR**| <code>pand sd, sn, sm</code> | $S[sd] \leftarrow S[sn]\ \& \ S[sm]$ |
-|**PR**>| <code>porr sd, sn, sm</code> | $S[sd] \leftarrow S[sn]\ \|\ S[sm]$ |
-|**PR**| <code>pxor sd, sn, sm</code> | $S[sd] \leftarrow S[sn]\ \^\ \ S[sm]$ |
+|**PR**| <code>pand sd, sn, sm</code> | $S[sd] \leftarrow S[sn]$ & $S[sm]$ |
+|**PR**>| <code>porr sd, sn, sm</code> | $S[sd] \leftarrow S[sn]$ \| $S[sm]$ |
+|**PR**| <code>pxor sd, sn, sm</code> | $S[sd] \leftarrow S[sn]$ ^ $S[sm]$ |
 |**PR**| <code>pseq sd, sn, sm</code> | $S[sd] \leftarrow (S[sn] == S[sm])$ |
 |**PR**| <code>pmov sd, sn</code> | $S[sd] \leftarrow S[sn]$ |
 |**PR**| <code>paddadd sd, sn, sm, sf</code> | $S[sd] \leftarrow (S[sn] + S[sm]) + S[sf]$ |
@@ -123,9 +123,9 @@
 |**PI**| <code>pmuli sd, sn, imm</code> | $S[sd] \leftarrow S[sn] * imm$ |
 |**PI**| <code>pdivi sd, sn, imm</code> | $S[sd] \leftarrow S[sn] \div imm$ |
 |**PI**| <code>pmodi sd, sn, imm</code> | $S[sd] \leftarrow S[sn]\ \%\ imm$ |
-|**PI**| <code>pandi sd, sn, imm</code> | $S[sd] \leftarrow S[sn]\ \& \ imm$ |
-|**PI**| <code>porri sd, sn, imm</code> | $S[sd] \leftarrow S[sn]\ \|\ imm$ |
-|**PI**| <code>pxori sd, sn, imm</code> | $S[sd] \leftarrow S[sn]\ \^\ \ imm$ |
+|**PI**| <code>pandi sd, sn, imm</code> | $S[sd] \leftarrow S[sn]$ & $imm$ |
+|**PI**| <code>porri sd, sn, imm</code> | $S[sd] \leftarrow S[sn]$ \| $imm$ |
+|**PI**| <code>pxori sd, sn, imm</code> | $S[sd] \leftarrow S[sn]$ ^ $imm$ |
 |**PI**| <code>pseqi sd, sn, imm</code> | $S[sd] \leftarrow (S[sn] == imm)$ |
 |**PI**| <code>pmovi sd, imm</code> | $S[sd] \leftarrow imm$ |
 |**T**| <code>send sd, rn </code> | $S[sd] \leftarrow R[rn]$ |
@@ -167,7 +167,9 @@
 
 ### Formato de encodificación de instrucciones
 
-![Formatos de instrucciones](images/encoding.png)
+<p align="center">
+    <img src="images/encoding.png" width=1500>
+</p>
 
 - **Tipo R**:
 
