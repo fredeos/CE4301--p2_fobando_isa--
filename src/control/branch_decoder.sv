@@ -2,7 +2,6 @@ module branch_decoder (
     input  logic [4:0] opcode,
     input  logic [3:0] func4,
     input  logic [4:0] rd,
-    input  logic [4:0] rn,
     output logic [4:0] Branch
 );
 
