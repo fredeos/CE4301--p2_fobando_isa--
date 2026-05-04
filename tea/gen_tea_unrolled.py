@@ -157,23 +157,34 @@ def emit_load_imm(program: Program, reg: str, value: int, comment: str = "") -> 
         remaining -= chunk
 
 
-def emit_program(mode: str, blocks: int, size_bytes: int, address: int) -> str:
+def emit_program(mode: str, blocks: int, size_bytes: int, address: int, runtime_config: bool = False) -> str:
     program = Program()
     op_name = "encrypt" if mode == "encrypt" else "decrypt"
     padded_size = blocks * 8
 
     program.emit(f"; TEA {op_name} completo in-place.")
-    program.emit(f"; Archivo: {size_bytes} bytes, {blocks} bloques de 64 bits.")
-    program.emit(f"; Padding TEA: {padded_size - size_bytes} bytes.")
-    program.emit(f"; Entrada/salida: data_mem desde address 0x{address:x}.")
+    if runtime_config:
+        program.emit("; Configuracion en runtime:")
+        program.emit(";   data_mem[0] = direccion byte inicial del archivo.")
+        program.emit(";   data_mem[4] = cantidad de bloques de 64 bits.")
+        program.emit("; El archivo empieza en data_mem[data_mem[0]].")
+    else:
+        program.emit(f"; Archivo: {size_bytes} bytes, {blocks} bloques de 64 bits.")
+        program.emit(f"; Padding TEA: {padded_size - size_bytes} bytes.")
+        program.emit(f"; Entrada/salida: data_mem desde address 0x{address:x}.")
     program.emit("; Llave TEA: vault[0..3].")
     program.emit()
 
     program.label("__init__")
     emit_load_imm(program, "sp", 512)
-    emit_load_imm(program, "r0", address, "byte address base en data_mem")
     emit_load_imm(program, "r3", 0, "bloque actual")
-    emit_load_imm(program, "r4", blocks, "total de bloques")
+    if runtime_config:
+        emit_load_imm(program, "r6", 0, "base de configuracion TEA")
+        program.emit("    ldw r0, +0(r6)    ; byte address base en data_mem")
+        program.emit("    ldw r4, +4(r6)    ; total de bloques")
+    else:
+        emit_load_imm(program, "r0", address, "byte address base en data_mem")
+        emit_load_imm(program, "r4", blocks, "total de bloques")
     program.emit()
     program.emit(f"    login {LOGIN_KEY}")
     program.emit()
@@ -232,10 +243,10 @@ def assemble(asm_path: Path, hex_path: Path) -> None:
     )
 
 
-def write_program(mode: str, blocks: int, size_bytes: int, address: int) -> None:
+def write_program(mode: str, blocks: int, size_bytes: int, address: int, runtime_config: bool) -> None:
     asm_path = TEA_DIR / f"tea_{mode}.asm"
     hex_path = TEA_DIR / f"tea_{mode}.hex"
-    asm_path.write_text(emit_program(mode, blocks, size_bytes, address), encoding="utf-8")
+    asm_path.write_text(emit_program(mode, blocks, size_bytes, address, runtime_config), encoding="utf-8")
     assemble(asm_path, hex_path)
 
 
@@ -245,6 +256,11 @@ def main() -> None:
     parser.add_argument("--size", type=int, help="Tamano en bytes si no se pasa --input.")
     parser.add_argument("--address", default="0x0", help="Direccion inicial en data_mem, en bytes.")
     parser.add_argument("--mode", choices=["encrypt", "decrypt", "both"], default="both")
+    parser.add_argument(
+        "--runtime-config",
+        action="store_true",
+        help="Genera TEA para leer base y cantidad de bloques desde data_mem[0] y data_mem[4].",
+    )
     args = parser.parse_args()
 
     if args.input:
@@ -270,7 +286,7 @@ def main() -> None:
     modes = ["encrypt", "decrypt"] if args.mode == "both" else [args.mode]
 
     for mode in modes:
-        write_program(mode, blocks, size_bytes, address)
+        write_program(mode, blocks, size_bytes, address, args.runtime_config)
 
     print("--- TEA program generado ---")
     print(f"Modo(s): {', '.join(modes)}")
@@ -278,7 +294,10 @@ def main() -> None:
     print(f"Tamano original: {size_bytes} bytes")
     print(f"Bloques TEA: {blocks} de 64 bits")
     print(f"Padding final: {padded_size - size_bytes} bytes")
-    print(f"Rango de memoria: 0x{address:x} -> 0x{address + padded_size - 1:x}")
+    if args.runtime_config:
+        print("Configuracion runtime: data_mem[0]=base, data_mem[4]=bloques")
+    else:
+        print(f"Rango de memoria: 0x{address:x} -> 0x{address + padded_size - 1:x}")
 
 
 if __name__ == "__main__":

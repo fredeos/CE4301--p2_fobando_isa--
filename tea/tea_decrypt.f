@@ -1,30 +1,40 @@
-# Descifrado de 64 bits usando TEA.
-# tea_block vive en memoria de datos y debe venir cargado antes de ejecutar.
-# key vive en vault[4] y ya esta cargado por vault_mem.hex.
-# delta es el registro read-only del ISA con valor 0x9E3779B9.
+# Descifrado completo in-place usando TEA.
+#
+# Este archivo documenta la intencion de alto nivel del ASM/HEX de TEA.
+# El archivo cifrado debe estar cargado en la misma direccion base usada
+# para cifrar. El cargador escribe la configuracion en data_mem asi:
+#
+#   data_mem[0] = base_address
+#   data_mem[4] = block_count
+#
+# Como data_mem[...] indexa direcciones byte, offset + 4 es la siguiente
+# palabra del bloque de 64 bits.
 
-int tea_block[2];      # Bloque de 64 bits cargado en memoria: dos palabras.
-vault[4] key;          # Ventana de 4 palabras hacia la boveda segura.
+int base_address;       # Direccion byte inicial donde se cargo el archivo cifrado.
+int block_count;        # ceil(file_size / 8).
+vault[4] key;           # key[0..3] desde la boveda segura.
 
 @secure(0xA9C1F)
-func int tea_decrypt(int[] v){
-    int v0 = v[0];       # Copia local de la primera palabra cifrada.
-    int v1 = v[1];       # Copia local de la segunda palabra cifrada.
-    int sum = delta << 5;    # Valor inicial equivalente a delta * 32.
+func void tea_decrypt_file(){
+    int offset = base_address;
 
-    for (int i = 0; i += 1; i < 32) {
-        v1 -= ((v0 << 4) + key[2]) ^ (v0 + sum) ^ ((v0 >> 5) + key[3]);    # Revierte la mezcla aplicada sobre v1.
-        v0 -= ((v1 << 4) + key[0]) ^ (v1 + sum) ^ ((v1 >> 5) + key[1]);    # Revierte la mezcla aplicada sobre v0.
-        sum -= delta;    # Retrocede el acumulador usando el registro delta.
+    for (int block = 0; block += 1; block < block_count) {
+        int v0 = data_mem[offset + 0];
+        int v1 = data_mem[offset + 4];
+        int sum = delta << 5;    # delta * 32.
+
+        for (int round = 0; round += 1; round < 32) {
+            v1 -= ((v0 << 4) + key[2]) ^ (v0 + sum) ^ ((v0 >> 5) + key[3]);
+            v0 -= ((v1 << 4) + key[0]) ^ (v1 + sum) ^ ((v1 >> 5) + key[1]);
+            sum -= delta;
+        }
+
+        data_mem[offset + 0] = v0;
+        data_mem[offset + 4] = v1;
+        offset += 8;
     }
-
-    v[0] = v0;    # Escribe la primera palabra descifrada.
-    v[1] = v1;    # Escribe la segunda palabra descifrada.
-    ret 0;        # Retorno convencional para indicar fin correcto.
 }
 
-# main no pertenece al algoritmo TEA.
-# Solo invoca el descifrado sobre los datos que ya estan en memoria.
 func void main(){
-    tea_decrypt(tea_block);    # Descifra in-place el bloque cargado en RAM.
+    tea_decrypt_file();
 }

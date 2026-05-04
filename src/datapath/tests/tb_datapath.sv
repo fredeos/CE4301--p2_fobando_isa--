@@ -3,7 +3,7 @@
 module tb_datapath ();
     logic clk, rst;
 
-    localparam cycles = 120000;
+    int cycles = 120000;
     logic [31:0] cycle;
 
     always #5 clk = ~clk;
@@ -18,6 +18,11 @@ module tb_datapath ();
         $dumpfile("./output/wave.vcd");
         $dumpvars(0, tb_datapath);
         $display("[Inicio del testbench]");
+        if ($value$plusargs("CYCLES=%d", cycles)) begin
+            $display("[SISTEMA] Ciclos configurados por plusarg: %0d", cycles);
+        end else begin
+            $display("[SISTEMA] Ciclos por defecto: %0d", cycles);
+        end
 
         // Inicializar el procesdor
         cycle = '0;
@@ -28,7 +33,7 @@ module tb_datapath ();
         // Ejecutar cantidad de ciclos deseada
         for (int i = 1; i < cycles; i++) begin 
             #10;
-            if ((i % 1000) == 0) begin
+            if ((i % 10000) == 0) begin
                 $display("Ciclo [%0d]", i);
             end
         end

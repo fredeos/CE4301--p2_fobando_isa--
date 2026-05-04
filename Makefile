@@ -112,10 +112,10 @@ run-config:
 	gtkwave ./output/wave.vcd ./output/$(TARGET).gtkw
 
 pyload-mem:
-	python src/load_file.py --input input/$(INPUT) --output src/$(OUTPUT) --address $(ADDRESS)
+	python3 src/load_file.py --input input/$(INPUT) --output src/$(OUTPUT) --address $(ADDRESS) $(if $(filter 1,$(TEA_CONFIG)),--tea-config,)
 
 pyextract-data:
-	python src/extract_data.py --memory output/$(INPUT) --address $(ADDRESS) --size $(SIZE) --output output/$(OUTPUT)
+	python3 src/extract_data.py --memory output/$(INPUT) --address $(ADDRESS) --size $(SIZE) --output output/$(OUTPUT)
 
 clean:
 	rm ./output/**
