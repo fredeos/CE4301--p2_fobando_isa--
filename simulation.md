@@ -27,14 +27,14 @@ Note que:
 - El TARGET especificado en el comando especifica un archivo .gtkw con una configuración de señales establecida, pero se puede especificar otro archivo de este tipo que se tenga guardado en el directorio `/output`. Por el contrario, si no se tiene un archivo de este tipo o la simulación no contiene las señales configuradas en este, puede ejecutar el comando (que no tiene ninguna configuración):
 
 ```bash
-make run
+$ make run
 ```
 
 ## Carga de datos a las memorias
 Para cargar datos en las memorias, ya sea en para instrucciones o datos, debe ejecutar el comando:
 
 ```bash
-
+$ make ...
 ```
 
 Donde x es el archivo de entrada y z es el archivo de salida. Note que:
@@ -48,7 +48,7 @@ Donde x es el archivo de entrada y z es el archivo de salida. Note que:
 Para extraer datos de la memoria de datos y guardarlos en un archivo debe ejecutar el comando:
 
 ```bash
-
+$ make ...
 ```
 
 Donde x es el archivo de salida donde se van guardar los datos en el tipo de formato especificado. Note que:
