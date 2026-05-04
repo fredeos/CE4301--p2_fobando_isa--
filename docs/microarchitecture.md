@@ -9,7 +9,7 @@ En esta sección se detalla la organización interna del procesador diseñado pa
 - ### Diagrama de bloques
 
 <p align="center">
-    <img src="images/datapath.svg" width=1500>
+    <img src="../images/datapath.svg" width=1500>
 </p>
 
 Notese que del diagrama anterior se resaltan las entradas y salidas del Hazard Unit con colores azules y verdes, respectivamente, mientras que para señales de control del Control Unit se utilizan múltiples colores y para conexiones de cada etapa se utiliza el color negro. Otro aspecto importante de notar es que todos los circuitos secuenciales y flip-flops tiene un señal RST, distinta a los CLR visibles, que permiten limpiar los registros de manera asíncrona para poder inicialiar el estado inicial del procesador (pipeline vacío).
@@ -23,7 +23,7 @@ Notese que del diagrama anterior se resaltan las entradas y salidas del Hazard U
   - **Unidad de control (*Control Unit*)**:
     Unidad encargada de decodificar las instrucciones y producir las señales de control necesarias para configurar las ALU, multiplexores, memorias y bancos de registros. Esta unidad está compuesta por tres submodulos: decodificador principal (*Main Decoder*), decodificador de ALU (*ALU Decoder*) y decodificador de ramas (*Branch Decoder*).
     <p align="center">
-        <img src="images/control_unit.svg" width=600>
+        <img src="../images/control_unit.svg" width=600>
     </p>
   - **Banco de registros (*Register File*)**:
     Circuito secuencial para escritura y lectura de 32 registros definidos por el ISA. Permite escritura en flancos positivos de reloj y lectura combinacional. Para la lectura de registros permite seleccionar un dato que se está escribiendo (*bypass*).
@@ -36,11 +36,11 @@ Notese que del diagrama anterior se resaltan las entradas y salidas del Hazard U
   - **Unidad de administrador (*Admin Unit*)**:
     Unidad secuencial encargada de llevar un control de los sesiones en el hardware seguro, esta permite llevar un conteo de ciclos para mantener una sesión abierta si no se han usado más instrucciones que requieren el hardware (este conteo es refrescable si ingresan más instrucciones de este tipo al pipeline) y conteo de ciclos para inhabilitar el uso de hardware seguro en caso de exceder la cantidad máxima de intentos de inicios de sesión.
     <p align="center">
-        <img src="images/admin_unit.svg" width=600>
+        <img src="../images/admin_unit.svg" width=600>
     </p>
     Este módulo hace uso de dos submódulos comparadores de ciclos (que son los que permiten llevar los conteos mencionados anteriormente)
     <p align="center">
-        <img src="images/cycle_comparer.svg" width=600>
+        <img src="../images/cycle_comparer.svg" width=600>
     </p>
   - **Unidad de condiciones (*Cond Unit*)**:
     Unidad combinacional utilizada para detectar las condiciones de los saltos utilizando las banderas de salidad de ALU. También, permite detectar si hay instrucciones que modifican el registro `PC` para poder alterar el flujo de las instrucciones.

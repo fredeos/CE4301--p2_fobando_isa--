@@ -168,7 +168,7 @@
 ### Formato de encodificación de instrucciones
 
 <p align="center">
-    <img src="images/encoding.png" width=1500>
+    <img src="../images/encoding.png" width=1500>
 </p>
 
 - **Tipo R**:
