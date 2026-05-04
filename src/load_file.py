@@ -1,4 +1,6 @@
 import argparse
+import math
+import mimetypes
 import os
 
 def get_output_path(filename):
@@ -18,6 +20,8 @@ def main():
     
     # Manejo de dirección
     start_addr = int(args.address, 16)
+    if start_addr % 4 != 0:
+        raise SystemExit("Error: la dirección inicial debe estar alineada a 4 bytes.")
     word_addr = start_addr // 4  # Dirección base en palabras de 32 bits
     
     if not os.path.exists(args.input):
@@ -28,12 +32,23 @@ def main():
         data = f.read()
     
     file_size = len(data)
+    detected_type = mimetypes.guess_type(args.input)[0] or "application/octet-stream"
+    words = math.ceil(file_size / 4)
+    tea_blocks = math.ceil(file_size / 8)
+    padded_size = tea_blocks * 8
     output_path = get_output_path(args.output)
 
     print(f"--- Cargando Archivo ---")
-    print(f"Origen: {args.input} ({file_size} bytes)")
+    print(f"Origen: {args.input}")
+    print(f"Tipo detectado: {detected_type}")
+    print(f"Tamaño: {file_size} bytes")
     print(f"Destino: {output_path}")
-    print(f"Rango: {hex(start_addr)} -> {hex(start_addr + file_size - 1)}")
+    print(f"Dirección inicial: {hex(start_addr)}")
+    print(f"Rango usado por archivo: {hex(start_addr)} -> {hex(start_addr + file_size - 1)}")
+    print(f"Palabras de 32 bits escritas: {words}")
+    print(f"Bloques TEA de 64 bits: {tea_blocks}")
+    print(f"Rango TEA con padding: {hex(start_addr)} -> {hex(start_addr + padded_size - 1)}")
+    print(f"Padding final para TEA: {padded_size - file_size} bytes")
 
     with open(output_path, 'w') as f:
         # El prefijo @ indica a $readmemh en qué índice de palabra empezar

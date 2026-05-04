@@ -3,7 +3,7 @@
 module tb_datapath ();
     logic clk, rst;
 
-    localparam cycles = 1000;
+    localparam cycles = 120000;
     logic [31:0] cycle;
 
     always #5 clk = ~clk;
@@ -28,7 +28,9 @@ module tb_datapath ();
         // Ejecutar cantidad de ciclos deseada
         for (int i = 1; i < cycles; i++) begin 
             #10;
-            $display("Ciclo [%0d]", i);
+            if ((i % 1000) == 0) begin
+                $display("Ciclo [%0d]", i);
+            end
         end
 
         // --- Volcado final de las memorias ---

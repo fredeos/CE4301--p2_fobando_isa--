@@ -111,8 +111,11 @@ run-config:
 	vvp ./output/sim.out
 	gtkwave ./output/wave.vcd ./output/$(TARGET).gtkw
 
-program_load:
-	python ./src/load_file.py --input ./input/$(TARGET) --output ./instrmem/instr_mem.hex --address 0x0
+pyload-mem:
+	python src/load_file.py --input input/$(INPUT) --output src/$(OUTPUT) --address $(ADDRESS)
+
+pyextract-data:
+	python src/extract_data.py --memory output/$(INPUT) --address $(ADDRESS) --size $(SIZE) --output output/$(OUTPUT)
 
 clean:
 	rm ./output/**

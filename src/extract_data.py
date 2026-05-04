@@ -1,7 +1,12 @@
 import argparse
+import math
 import os
 
 def get_input_path(filename):
+    direct_path = os.path.normpath(filename)
+    if os.path.exists(direct_path):
+        return direct_path
+
     current_dir = os.path.dirname(os.path.abspath(__file__))
     # Ajustamos para buscar en la carpeta de salida o memorias según tu flujo
     return os.path.normpath(os.path.join(current_dir, "..", "output", filename))
@@ -18,8 +23,12 @@ def main():
     # Intenta buscar en output primero (donde Verilog guarda el modificado)
     mem_path = get_input_path(args.memory)
     start_addr = int(args.address, 16)
+    if start_addr % 4 != 0:
+        raise SystemExit("Error: la dirección inicial debe estar alineada a 4 bytes.")
     word_start = start_addr // 4
     num_words = (args.size + 3) // 4 
+    tea_blocks = math.ceil(args.size / 8)
+    padded_size = tea_blocks * 8
 
     if not os.path.exists(mem_path):
         print(f"Error: No se encuentra el archivo en {mem_path}")
@@ -63,6 +72,10 @@ def main():
     
     print(f"--- Extracción Completada ---")
     print(f"Archivo procesado: {mem_path}")
+    print(f"Dirección inicial: {hex(start_addr)}")
+    print(f"Rango extraído: {hex(start_addr)} -> {hex(start_addr + args.size - 1)}")
+    print(f"Bloques TEA esperados: {tea_blocks}")
+    print(f"Rango TEA con padding: {hex(start_addr)} -> {hex(start_addr + padded_size - 1)}")
     print(f"Bytes extraídos: {len(extracted_bytes[:args.size])}")
     print(f"Archivo de salida: {args.output}")
 
@@ -70,7 +83,7 @@ if __name__ == "__main__":
     main()
 
 
-"""
+r"""
 cd src\data_utilities
 python extract_data.py --memory ../output/bedrock_mod.hex --address 0x0 --size 247 --output ../test_files/bedrock_recuperada.png
 cd ../

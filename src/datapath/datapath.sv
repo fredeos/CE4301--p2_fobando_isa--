@@ -6,7 +6,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
     // --- Valores default del procesador ---
     localparam logic [31:0] nop = 32'h00000080; // Valor por defecto para omitir instrucciones
     localparam logic [31:0] password = 32'h000A9C1F; // Contraseña para accesos al hardware seguro
-    localparam logic [31:0] lifetime = 32'd35;   // tiempo de vida (en ciclos) de session segura entre instrucciones para hardware seguro
+    localparam logic [31:0] lifetime = 32'd10000; // tiempo de vida (en ciclos) de session segura para operaciones criptograficas
     localparam logic [31:0] timeout = 32'd10000; // tiempo de espera (en ciclos) al exceder la cantidad de intenos de inicio de session
     localparam logic [31:0] max = 32'd4; // limite de intentos para iniciar session segura
     

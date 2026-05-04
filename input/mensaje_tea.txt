@@ -1,0 +1,3 @@
+Hola desde F32IS.
+Este texto se carga en data_mem en 0x100.
+Luego TEA lo cifra y lo descifra in-place.
