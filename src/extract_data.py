@@ -9,7 +9,7 @@ def get_input_path(filename):
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
     # Ajustamos para buscar en la carpeta de salida o memorias según tu flujo
-    return os.path.normpath(os.path.join(current_dir, "..", "output", filename))
+    return os.path.normpath(os.path.join(current_dir, "..", filename))
 
 def main():
     parser = argparse.ArgumentParser(description='Extrae datos de memoria a binario')

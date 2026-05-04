@@ -25,20 +25,12 @@ module control_unit (
     output logic        SecSrc    // seleccion de registro 2 (sm | sd)
 );
     // Senales internas de la unidad de control
-    logic [4:0] rd, rn, rm;
-    logic [2:0] sd, sn, sm, sf, func3;
+    logic [4:0] rd;
+    logic [2:0] func3;
     logic [6:0] func7;
 
     assign rd = source[4:0];
-    assign rn = source[9:5];
-    assign rm = source[14:10];
-    
-    assign sd = source[2:0];
-    assign sn = source[5:3];
-    assign sm = source[8:6];
-    assign sf = source[11:9];
     assign func3 = source[14:12];
-
     assign func7 = source[21:15];
 
     // --- Instanciar decodificadores de control ---
@@ -65,7 +57,7 @@ module control_unit (
 
     branch_decoder _branch_deco (
         .opcode(opcode), .func4(func4),
-        .rd(rd), .rn(rn),
+        .rd(rd),
         .Branch(Branch)
     );
 

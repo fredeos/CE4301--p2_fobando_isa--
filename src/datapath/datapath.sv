@@ -376,7 +376,7 @@ module datapath ( // Pipeline de 5 etapas para arquitectura RISC: F32IS
         .WBInstr(WB_INSTR),
         .RD1PipeEX(EX_Op1), .RD2PipeEX(EX_Op2), .RD3PipeEX(EX_Op3),
         .ALUOut(MEM_ALUOut), .DataOutWB(WB_DataOut),
-        .branch_taken(MEM_PCSrc[0] | MEM_PCSrc[1]),
+        .branch_taken(MEM_PCSrc[0] | MEM_PCSrc[1] | WB_PCSrc),
         .mem_busy(1'b0),
         .wb_busy(1'b0),
         .StallIF(IF_EN), .FlushIF(IF_CLR),
