@@ -1,34 +1,61 @@
-# Simulación de procesador
+# Modelado de la simulación
+
+- **Entorno de simulación**: testbench. Todos lo módulos implementados vienen con su respectivo testbench para simulación. No todos los testbench hacen uso del visualizador de ondas.
+- **Estímulos**: casos de prueba. Ya sea qué el módulo describa un circuito combinacional o secuencial, las pruebas se realizan estimulando las señales de entrada de los módulos y verificando las salidas por medio de `$display()` para diferentes casos.
+- **Temporización**: para módulos secuenciales se realiza la temporización por medio de pulsaciones controladas de las señales de reloj por medio de `always #5 clk = ~clk`, entre otros. La lógica de los circuitos secuenciales se diseña para flancos positivos.
+- **Otras herramientas**: para los módulos con memorias modificables se hacen volcados de memoria para guardar el estado final en archivos hexadecimales en el directorio `/output`.
 
 -----------
 
-## Compilación del procesador
+## Compilación de un módulo
 
-Para poder compilar el procesador debe ejecutar el comando:
+Para poder compilar un módulo y sus dependencias con su respectivo testbench debe ejecutar el comando respectivo de los mostrados a continuación:
 
 ```bash
-$ make Datapath
+$ make ControlUnit        # Unidad de Control
+$ make CondUnit           # Unidad de Condiciones
+$ make AdminUnit          # Unidad de Administradord
+$ make SSU                # Unidad de Selección Segura
+$ make SecureMemory       # Memoria Segura
+$ make RegFile            # Banco de Registros
+$ make Hazard             # Unidad de Riesgos
+$ make InstructionMemory  # Memoria de Instrucciones
+$ make DataMemory         # Memoria de Datos
+$ make Vault              # Bóveda
+$ make pALU               # ALU primaria
+$ make sALU               # ALU secundaria
+$ make ImmExt             # Unidad de Extensión de Inmediatos
+$ make Datapath           # Datapath del procesador
 ```
 
-## Simulación del procesador
-Para poder simular la ejecución de un programa en el procesador ejecute el comando:
+## Simulación por medio de ejecución del testbench
+
+Para poder ejecutar la simulación sin ningún tipo de configuración para el graficador de ondas, ejecute el comando:
+
+```bash
+$ make run
+```
+
+Para poder ejecutar la simulación con una configuración de señales para el generador de ondas, ejecute el comando:
 
 ```bash
 $ make run-config TARGET=wave
 ```
 
+Estos comandos ejecutan el testbench respectivo para el módulo compilado.
+
 Note que:
 
-- En el directorio `/output` se generan los siguientes archivos:
-  - Estado de salida de memoria de datos: `data_mem_exit.hex`
-  - Estado de salida de bóveda: `vault_exit.hex`
-  - Estado de salida de banco de registros: `regfile_exit.hex`
-  - Estado de salida de memoria segura: `secmem_exit.hex`
-- El TARGET especificado en el comando especifica un archivo .gtkw con una configuración de señales establecida, pero se puede especificar otro archivo de este tipo que se tenga guardado en el directorio `/output`. Por el contrario, si no se tiene un archivo de este tipo o la simulación no contiene las señales configuradas en este, puede ejecutar el comando (que no tiene ninguna configuración):
+- En todos los casos en el directorio `/output` se generan los archivos:
+  - `sim.out`: archivo de simulación
+  - `wave.vcd`: graficador de ondas para la simulación
+- En casos de módulos con memorias, en el directorio `/output` se generan los siguientes archivos:
+  - Estado de salida de memoria de datos: `data_mem_exit.hex` (datapath y memoria de datos)
+  - Estado de salida de bóveda: `vault_exit.hex` (datapath y bóveda)
+  - Estado de salida de banco de registros: `regfile_exit.hex` (datapath)
+  - Estado de salida de memoria segura: `secmem_exit.hex` (datapath)
 
-```bash
-$ make run
-```
+- El TARGET especificado en el comando especifica un archivo .gtkw con una configuración de señales establecida, pero se puede especificar otro archivo de este tipo que se tenga guardado en el directorio `/output`.
 
 ## Carga de datos a las memorias
 Para cargar datos en las memorias, ya sea en para instrucciones o datos, debe ejecutar el comando:
