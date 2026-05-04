@@ -1,0 +1,6 @@
+TEA (Tiny Encryption Algorithm) es un algoritmo de cifrado por bloques
+disenado por David Wheeler y Roger Needham en 1994. Opera sobre bloques
+de 64 bits usando una llave de 128 bits y realiza 32 rondas de mezcla
+con una constante magica delta = 0x9E3779B9, derivada del numero aureo.
+
+Viva FRISC
