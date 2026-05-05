@@ -4,6 +4,7 @@ module tb_datapath ();
     logic clk, rst;
 
     int cycles = 120000;
+    int factor = 10000;
     logic [31:0] cycle;
 
     always #5 clk = ~clk;
@@ -33,7 +34,7 @@ module tb_datapath ();
         // Ejecutar cantidad de ciclos deseada
         for (int i = 1; i < cycles; i++) begin 
             #10;
-            if ((i % 10000) == 0) begin
+            if ((i % factor) == 0) begin
                 $display("Ciclo [%0d]", i);
             end
         end
