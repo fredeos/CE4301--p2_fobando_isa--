@@ -14,5 +14,6 @@ module tb_top ();
         x = 0;
         #10;
         $display("Hello World!");
+        $finish;
     end
 endmodule
